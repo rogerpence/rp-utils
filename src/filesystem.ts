@@ -3,37 +3,35 @@ import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
 
-export function getRelativePath() {
-    const fullFilePath = fileURLToPath(import.meta.url);
-
-    return path.dirname(fullFilePath);
-}
-
 /**
+ * Retrieves directory entries for all files and subdirectories in a directory
  *
- * @param fullPath
- * @param lastDirectory
- * @returns 'fullPath' value truncated after 'lastDirectory'
- * @example
- * truncatePathAfter(`c:\\one\\two\\three\\test.json`, 'two')
- * returns `c:\\one\\two`
- * An error occurs and processing stops if 'fullPath' doesn't
- * include the 'lastDirectory' folder.
+ * Returns an array of fs.Dirent objects which include file names and types
+ * (file, directory, symbolic link, etc.) without additional filesystem stat information.
+ *
+ * @param targetDirectory - The path to the directory to read
+ * @returns An array of fs.Dirent objects, or undefined if the directory doesn't exist or an error occurs
  */
+export const getDirEntries = (
+    targetDirectory: string
+): fs.Dirent[] | undefined => {
+    try {
+        // Check if directory exists synchronously
+        if (!fs.existsSync(targetDirectory)) {
+            console.log(`Directory does not exist: ${targetDirectory}`);
+            return undefined;
+        }
 
-export function truncatePathAfterDirectory(
-    fullPath: string,
-    lastDirectory: string
-): string {
-    const parts = fullPath.split(path.sep);
-
-    const srcIndex = parts.indexOf(lastDirectory);
-    if (srcIndex === -1) {
-        console.error(`Path doesn't contain the '${lastDirectory}' directory`);
-        process.exit(1);
+        // withFileNames: true causes array of Dirent's to be returned.
+        const filenames: fs.Dirent[] = fs.readdirSync(targetDirectory, {
+            withFileTypes: true,
+        });
+        return filenames;
+    } catch (error) {
+        console.log(error);
+        return undefined;
     }
-    return parts.slice(0, srcIndex + 1).join(path.sep);
-}
+};
 
 /**
  *
@@ -72,6 +70,38 @@ export function getPathForCli(...segments: string[]): string {
     }
 
     return path.join(srcPath, ...segments);
+}
+
+export function getRelativePath() {
+    const fullFilePath = fileURLToPath(import.meta.url);
+
+    return path.dirname(fullFilePath);
+}
+
+/**
+ *
+ * @param fullPath
+ * @param lastDirectory
+ * @returns 'fullPath' value truncated after 'lastDirectory'
+ * @example
+ * truncatePathAfter(`c:\\one\\two\\three\\test.json`, 'two')
+ * returns `c:\\one\\two`
+ * An error occurs and processing stops if 'fullPath' doesn't
+ * include the 'lastDirectory' folder.
+ */
+
+export function truncatePathAfterDirectory(
+    fullPath: string,
+    lastDirectory: string
+): string {
+    const parts = fullPath.split(path.sep);
+
+    const srcIndex = parts.indexOf(lastDirectory);
+    if (srcIndex === -1) {
+        console.error(`Path doesn't contain the '${lastDirectory}' directory`);
+        process.exit(1);
+    }
+    return parts.slice(0, srcIndex + 1).join(path.sep);
 }
 
 export type WriteObjectToFileOptions = {
