@@ -1,6 +1,6 @@
 {
     "name": "@rp/utils",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "type": "module",
     "main": "index.js",
     "exports": {
@@ -13,7 +13,9 @@
         "src"
     ],
     "dependencies": {
+        "@types/js-yaml": "^4.0.9",
         "@types/node": "^22.19.1",
-        "ansis": "^4.2.0"
+        "ansis": "^4.2.0",
+        "js-yaml": "^4.1.1"
     }
 }
