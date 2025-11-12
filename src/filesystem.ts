@@ -1,6 +1,7 @@
 import "$lib/cli/console-extensions";
 import { fileURLToPath } from "url";
 import path from "path";
+import fs from "fs";
 
 export function getRelativePath() {
     const fullFilePath = fileURLToPath(import.meta.url);
@@ -71,4 +72,85 @@ export function getPathForCli(...segments: string[]): string {
     }
 
     return path.join(srcPath, ...segments);
+}
+
+export type WriteObjectToFileOptions = {
+    exportName?: string;
+    compressed?: boolean;
+    log?: boolean;
+};
+
+/**
+ * Writes a JavaScript object to a JSON file.
+ *
+ * @param {string} filePath - The path where the JSON file will be written
+ * @param {unknown} object - The object to serialize and write to the file
+ * @param {WriteObjectToFileOptions} [options] - Optional configuration
+ * @param {string} [options.objectName] - A descriptive name for logging purposes
+ * @param {boolean} [options.compressed=false] - If true, writes minified JSON without whitespace
+ * @param {boolean} [options.log=true] - If true, logs success message to console
+ *
+ * @throws {Error} If the file cannot be written or the object cannot be serialized
+ *
+ * @example
+ * Write with default options (formatted, logged):
+ *   writeObjectToFile('data.json', myObject);
+ *
+ * @example
+ * Write compressed without logging:
+ *   writeObjectToFile('data.json', myObject, { compressed: true, log: false });
+ *
+ * @example
+ * Write with custom name for logging:
+ *   writeObjectToFile('index.json', indexObjects, { objectName: 'indexObjects' });
+ */
+export function writeObjectToFile(
+    object: unknown,
+    filePath: string,
+    options?: WriteObjectToFileOptions
+): void {
+    const { compressed = false, log = true } = options ?? {};
+
+    try {
+        // Ensure directory exists
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+            console.error(`writeObjectToFile error:  ${dir} not found`);
+            process.exit(1);
+        }
+
+        if (filePath.endsWith(".json") && options?.exportName) {
+            console.error(
+                `writeObjectToFile error:  Cannot not write to .json file with export name`
+            );
+            process.exit(1);
+        }
+
+        if (filePath.endsWith(".js") && !options?.exportName) {
+            console.error(
+                `writeObjectToFile error:  Must provide an export name for a .js`
+            );
+            process.exit(1);
+        }
+
+        const exportedName = options?.exportName
+            ? `export const ${options?.exportName} = `
+            : "";
+
+        // Serialize with appropriate formatting
+        const json = compressed
+            ? JSON.stringify(object)
+            : JSON.stringify(object, null, 4);
+
+        // Write to file
+        fs.writeFileSync(filePath, `${exportedName}${json}`, "utf-8");
+
+        // Optional logging
+        if (log) {
+            console.success(`✓ Wrote ${filePath}`);
+        }
+    } catch (error) {
+        console.error(`Failed to write file ${filePath}:`, error);
+        throw error;
+    }
 }
