@@ -2,7 +2,8 @@
     "name": "@rp/utils",
     "version": "1.0.3",
     "type": "module",
-    "main": "index.js",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": "./src/index.ts",
         "./console": "./src/console.ts",
@@ -12,7 +13,7 @@
         "./string": "./src/string.ts"
     },
     "files": [
-        "src"
+        "dist"
     ],
     "dependencies": {
         "@types/js-yaml": "^4.0.9",

@@ -34,6 +34,57 @@ export const getDirEntries = (
 };
 
 /**
+ * Recursively retrieves all file entries (not directories) for a directory tree
+ *
+ * Traverses the entire directory structure starting from targetDirectory,
+ * returning fs.Dirent objects for all files found (excludes directories).
+ *
+ * @param targetDirectory - The path to the root directory to start traversal
+ * @returns An array of fs.Dirent objects for files only, or undefined if an error occurs
+ */
+export const getAllDirEntries = (
+    targetDirectory: string
+): fs.Dirent[] | undefined => {
+    try {
+        // Check if directory exists
+        if (!fs.existsSync(targetDirectory)) {
+            console.log(`Directory does not exist: ${targetDirectory}`);
+            return undefined;
+        }
+
+        const allEntries = new Set<fs.Dirent>();
+
+        // Read entries in current directory
+        const entries = fs.readdirSync(targetDirectory, {
+            withFileTypes: true,
+        });
+
+        for (const entry of entries) {
+            // If it's a directory, recursively get its file entries
+            if (entry.isDirectory()) {
+                const fullPath = path.join(
+                    entry.parentPath || targetDirectory,
+                    entry.name
+                );
+                const subEntries = getAllDirEntries(fullPath);
+
+                if (subEntries) {
+                    subEntries.forEach((subEntry) => allEntries.add(subEntry));
+                }
+            } else if (entry.isFile()) {
+                // Only add file entries (not directories)
+                allEntries.add(entry);
+            }
+        }
+
+        return Array.from(allEntries);
+    } catch (error) {
+        console.log(error);
+        return undefined;
+    }
+};
+
+/**
  *
  * @param segments
  * @returns fully-qualified path to the file specified.
