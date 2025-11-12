@@ -1,0 +1,19 @@
+{
+    "name": "utils",
+    "version": "1.0.0",
+    "type": "module",
+    "main": "index.js",
+    "exports": {
+        ".": "./src/index.ts",
+        "./console": "./src/console.ts",
+        "./date": "./src/date.ts",
+        "./filesystem": "./src/filesystem.ts"
+    },
+    "files": [
+        "src"
+    ],
+    "dependencies": {
+        "@types/node": "^22.19.1",
+        "ansis": "^4.2.0"
+    }
+}
