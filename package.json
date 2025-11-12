@@ -1,13 +1,15 @@
 {
     "name": "@rp/utils",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "type": "module",
     "main": "index.js",
     "exports": {
         ".": "./src/index.ts",
         "./console": "./src/console.ts",
         "./date": "./src/date.ts",
-        "./filesystem": "./src/filesystem.ts"
+        "./filesystem": "./src/filesystem.ts",
+        "./markdown": "./src/markdown.ts",
+        "./string": "./src/string.ts"
     },
     "files": [
         "src"
