@@ -1,4 +1,4 @@
-import "$lib/cli/console-extensions";
+import "./console";
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
