@@ -1,6 +1,6 @@
 // This is know as the barrel export pattern.
-export * from "./console.js";
-export * from "./date.js";
-export * from "./filesystem.js";
-export * from "./markdown.js";
-export * from "./string.js";
+export * from "./console.ts";
+export * from "./date.ts";
+export * from "./filesystem.ts";
+export * from "./markdown.ts";
+export * from "./string.ts";
