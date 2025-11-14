@@ -122,7 +122,7 @@ export function getPathForCli(...segments: string[]): string {
   return path.join(srcPath, ...segments);
 }
 
-export function getRelativePath(currentMetaUrl: string) {
+export function getRelativePath(currentMetaUrl: string): string {
   const fullFilePath = fileURLToPath(currentMetaUrl);
 
   return path.dirname(fullFilePath);
