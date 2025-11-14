@@ -1,8 +1,11 @@
 {
     "name": "@rogerpence/rp-utils",
-    "version": "1.0.12",
+    "version": "2.21.155",
     "type": "module",
     "main": "./src/index.js",
+    "scripts": {
+        "docs": "typedoc --out ./docs --darkHighlightTheme github-dark"
+    },
     "exports": {
         ".": "./src/index.ts",
         "./console": "./src/console.ts",
@@ -19,5 +22,8 @@
         "@types/node": "^22.19.1",
         "ansis": "^4.2.0",
         "js-yaml": "^4.1.1"
+    },
+    "devDependencies": {
+        "vitest": "^4.0.9"
     }
 }

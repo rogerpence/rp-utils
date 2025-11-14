@@ -88,7 +88,6 @@ export const getAllDirEntries = (
  *
  * @param segments
  * @returns fully-qualified path to the file specified.
- * @description
  *
  * This function is for use only for CLI use in the dev
  * environment. It will not work in a serverless deployment
@@ -135,12 +134,14 @@ export function getRelativePath() {
  * @param lastDirectory
  * @returns 'fullPath' value truncated after 'lastDirectory'
  * @example
- * truncatePathAfter(`c:\\one\\two\\three\\test.json`, 'two')
+ * ```
+ * truncatePathAfterDirectory(`c:\\one\\two\\three\\test.json`, 'two')
+ * ```
  * returns `c:\\one\\two`
- * An error occurs and processing stops if 'fullPath' doesn't
+ *
+ * @remarks An error occurs and processing stops if 'fullPath' doesn't
  * include the 'lastDirectory' folder.
  */
-
 export function truncatePathAfterDirectory(
     fullPath: string,
     lastDirectory: string
@@ -167,7 +168,7 @@ export type WriteObjectToFileOptions = {
  * @param {string} filePath - The path where the JSON file will be written
  * @param {unknown} object - The object to serialize and write to the file
  * @param {WriteObjectToFileOptions} [options] - Optional configuration
- * @param {string} [options.objectName] - A descriptive name for logging purposes
+ * @param {string} [options.exportName] - Names the array when creating a TypeScript file.
  * @param {boolean} [options.compressed=false] - If true, writes minified JSON without whitespace
  * @param {boolean} [options.log=true] - If true, logs success message to console
  *

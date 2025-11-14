@@ -12,6 +12,7 @@ const originalError = console.error;
 const originalLog = console.log;
 const originalInfo = console.info;
 const originalWarn = console.warn;
+
 // warn
 
 console.error = function (...args: any[]): void {
@@ -38,4 +39,23 @@ console.jsonString = function (jsonObj: any): void {
     originalLog(ansis.green(JSON.stringify(jsonObj, null, 4)));
 };
 
-export {};
+/**
+ * Console extensions that add color-coded logging methods.
+ *
+ * Import this module to add the following methods to the global console object:
+ * - `console.success()` - Green text for success messages
+ * - `console.jsonString()` - Pretty-printed JSON in green
+ * - Enhanced `console.error()` - Red text
+ * - Enhanced `console.log()` - Blue text
+ * - Enhanced `console.info()` - Cyan text
+ * - Enhanced `console.warn()` - Yellow text
+ *
+ * @example
+ * ```typescript
+ * import '@rogerpence/rp-utils/console';
+ *
+ * console.success('Operation completed!');
+ * console.jsonString({ foo: 'bar' });
+ * ```
+ */
+export const consoleExtensions = true;

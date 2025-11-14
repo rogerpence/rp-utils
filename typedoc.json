@@ -1,0 +1,17 @@
+{
+  // "entryPoints": ["src/index.ts", "src/console.ts"],
+  "entryPoints": ["src/*.ts"],
+
+  "out": "docs",
+  "exclude": [
+    "**/node_modules/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/index.ts"
+  ],
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "./README.md",
+  "plugin": []
+}
