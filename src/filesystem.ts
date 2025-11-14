@@ -13,24 +13,24 @@ import fs from "fs";
  * @returns An array of fs.Dirent objects, or undefined if the directory doesn't exist or an error occurs
  */
 export const getDirEntries = (
-    targetDirectory: string
+  targetDirectory: string,
 ): fs.Dirent[] | undefined => {
-    try {
-        // Check if directory exists synchronously
-        if (!fs.existsSync(targetDirectory)) {
-            console.log(`Directory does not exist: ${targetDirectory}`);
-            return undefined;
-        }
-
-        // withFileNames: true causes array of Dirent's to be returned.
-        const filenames: fs.Dirent[] = fs.readdirSync(targetDirectory, {
-            withFileTypes: true,
-        });
-        return filenames;
-    } catch (error) {
-        console.log(error);
-        return undefined;
+  try {
+    // Check if directory exists synchronously
+    if (!fs.existsSync(targetDirectory)) {
+      console.log(`Directory does not exist: ${targetDirectory}`);
+      return undefined;
     }
+
+    // withFileNames: true causes array of Dirent's to be returned.
+    const filenames: fs.Dirent[] = fs.readdirSync(targetDirectory, {
+      withFileTypes: true,
+    });
+    return filenames;
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
 };
 
 /**
@@ -43,45 +43,45 @@ export const getDirEntries = (
  * @returns An array of fs.Dirent objects for files only, or undefined if an error occurs
  */
 export const getAllDirEntries = (
-    targetDirectory: string
+  targetDirectory: string,
 ): fs.Dirent[] | undefined => {
-    try {
-        // Check if directory exists
-        if (!fs.existsSync(targetDirectory)) {
-            console.log(`Directory does not exist: ${targetDirectory}`);
-            return undefined;
-        }
-
-        const allEntries = new Set<fs.Dirent>();
-
-        // Read entries in current directory
-        const entries = fs.readdirSync(targetDirectory, {
-            withFileTypes: true,
-        });
-
-        for (const entry of entries) {
-            // If it's a directory, recursively get its file entries
-            if (entry.isDirectory()) {
-                const fullPath = path.join(
-                    entry.parentPath || targetDirectory,
-                    entry.name
-                );
-                const subEntries = getAllDirEntries(fullPath);
-
-                if (subEntries) {
-                    subEntries.forEach((subEntry) => allEntries.add(subEntry));
-                }
-            } else if (entry.isFile()) {
-                // Only add file entries (not directories)
-                allEntries.add(entry);
-            }
-        }
-
-        return Array.from(allEntries);
-    } catch (error) {
-        console.log(error);
-        return undefined;
+  try {
+    // Check if directory exists
+    if (!fs.existsSync(targetDirectory)) {
+      console.log(`Directory does not exist: ${targetDirectory}`);
+      return undefined;
     }
+
+    const allEntries = new Set<fs.Dirent>();
+
+    // Read entries in current directory
+    const entries = fs.readdirSync(targetDirectory, {
+      withFileTypes: true,
+    });
+
+    for (const entry of entries) {
+      // If it's a directory, recursively get its file entries
+      if (entry.isDirectory()) {
+        const fullPath = path.join(
+          entry.parentPath || targetDirectory,
+          entry.name,
+        );
+        const subEntries = getAllDirEntries(fullPath);
+
+        if (subEntries) {
+          subEntries.forEach((subEntry) => allEntries.add(subEntry));
+        }
+      } else if (entry.isFile()) {
+        // Only add file entries (not directories)
+        allEntries.add(entry);
+      }
+    }
+
+    return Array.from(allEntries);
+  } catch (error) {
+    console.log(error);
+    return undefined;
+  }
 };
 
 /**
@@ -110,22 +110,22 @@ export const getAllDirEntries = (
  */
 
 export function getPathForCli(...segments: string[]): string {
-    // Regardless of where this source file is located, results
-    // are always under SvelteKit's 'src' folder.
-    const srcPath = truncatePathAfterDirectory(process.cwd(), "src");
+  // Regardless of where this source file is located, results
+  // are always under SvelteKit's 'src' folder.
+  const srcPath = truncatePathAfterDirectory(process.cwd(), "src");
 
-    if (segments.length == 1) {
-        segments.push();
-        segments = ["lib", "data", ...segments];
-    }
+  if (segments.length == 1) {
+    segments.push();
+    segments = ["lib", "data", ...segments];
+  }
 
-    return path.join(srcPath, ...segments);
+  return path.join(srcPath, ...segments);
 }
 
-export function getRelativePath() {
-    const fullFilePath = fileURLToPath(import.meta.url);
+export function getRelativePath(currentMetaUrl: string) {
+  const fullFilePath = fileURLToPath(currentMetaUrl);
 
-    return path.dirname(fullFilePath);
+  return path.dirname(fullFilePath);
 }
 
 /**
@@ -143,23 +143,23 @@ export function getRelativePath() {
  * include the 'lastDirectory' folder.
  */
 export function truncatePathAfterDirectory(
-    fullPath: string,
-    lastDirectory: string
+  fullPath: string,
+  lastDirectory: string,
 ): string {
-    const parts = fullPath.split(path.sep);
+  const parts = fullPath.split(path.sep);
 
-    const srcIndex = parts.indexOf(lastDirectory);
-    if (srcIndex === -1) {
-        console.error(`Path doesn't contain the '${lastDirectory}' directory`);
-        process.exit(1);
-    }
-    return parts.slice(0, srcIndex + 1).join(path.sep);
+  const srcIndex = parts.indexOf(lastDirectory);
+  if (srcIndex === -1) {
+    console.error(`Path doesn't contain the '${lastDirectory}' directory`);
+    process.exit(1);
+  }
+  return parts.slice(0, srcIndex + 1).join(path.sep);
 }
 
 export type WriteObjectToFileOptions = {
-    exportName?: string;
-    compressed?: boolean;
-    log?: boolean;
+  exportName?: string;
+  compressed?: boolean;
+  log?: boolean;
 };
 
 /**
@@ -187,52 +187,52 @@ export type WriteObjectToFileOptions = {
  *   writeObjectToFile('index.json', indexObjects, { objectName: 'indexObjects' });
  */
 export function writeObjectToFile(
-    object: unknown,
-    filePath: string,
-    options?: WriteObjectToFileOptions
+  object: unknown,
+  filePath: string,
+  options?: WriteObjectToFileOptions,
 ): void {
-    const { compressed = false, log = true } = options ?? {};
+  const { compressed = false, log = true } = options ?? {};
 
-    try {
-        // Ensure directory exists
-        const dir = path.dirname(filePath);
-        if (!fs.existsSync(dir)) {
-            console.error(`writeObjectToFile error:  ${dir} not found`);
-            process.exit(1);
-        }
-
-        if (filePath.endsWith(".json") && options?.exportName) {
-            console.error(
-                `writeObjectToFile error:  Cannot not write to .json file with export name`
-            );
-            process.exit(1);
-        }
-
-        if (filePath.endsWith(".js") && !options?.exportName) {
-            console.error(
-                `writeObjectToFile error:  Must provide an export name for a .js`
-            );
-            process.exit(1);
-        }
-
-        const exportedName = options?.exportName
-            ? `export const ${options?.exportName} = `
-            : "";
-
-        // Serialize with appropriate formatting
-        const json = compressed
-            ? JSON.stringify(object)
-            : JSON.stringify(object, null, 4);
-
-        // Write to file
-        fs.writeFileSync(filePath, `${exportedName}${json}`, "utf-8");
-
-        // Optional logging
-        if (log) {
-            console.success(`✓ Wrote ${filePath}`);
-        }
-    } catch (error) {
-        console.error(`Failed to write file ${filePath}:`, error);
-        throw error;
+  try {
+    // Ensure directory exists
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      console.error(`writeObjectToFile error:  ${dir} not found`);
+      process.exit(1);
     }
+
+    if (filePath.endsWith(".json") && options?.exportName) {
+      console.error(
+        `writeObjectToFile error:  Cannot not write to .json file with export name`,
+      );
+      process.exit(1);
+    }
+
+    if (filePath.endsWith(".js") && !options?.exportName) {
+      console.error(
+        `writeObjectToFile error:  Must provide an export name for a .js`,
+      );
+      process.exit(1);
+    }
+
+    const exportedName = options?.exportName
+      ? `export const ${options?.exportName} = `
+      : "";
+
+    // Serialize with appropriate formatting
+    const json = compressed
+      ? JSON.stringify(object)
+      : JSON.stringify(object, null, 4);
+
+    // Write to file
+    fs.writeFileSync(filePath, `${exportedName}${json}`, "utf-8");
+
+    // Optional logging
+    if (log) {
+      console.success(`✓ Wrote ${filePath}`);
+    }
+  } catch (error) {
+    console.error(`Failed to write file ${filePath}:`, error);
+    throw error;
+  }
 }
