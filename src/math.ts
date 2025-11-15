@@ -2,10 +2,10 @@
  * Return type for the divMod function containing both division result and modulo.
  */
 export type DivMod = {
-  /** The quotient (result of integer division) */
-  result: number;
-  /** The remainder (modulo) */
-  mod: number;
+    /** The quotient (result of integer division) */
+    quotient: number;
+    /** The remainder (modulo) */
+    remainder: number;
 };
 
 /**
@@ -21,6 +21,12 @@ export type DivMod = {
  * console.log(result); // { result: 3, mod: 2 }
  * ```
  */
-export const divMod = (quotient: number, divisor: number): DivMod => {
-  return { result: Math.floor(quotient / divisor), mod: quotient % divisor };
+export const divideWithRemainder = (
+    quotient: number,
+    divisor: number
+): DivMod => {
+    return {
+        quotient: Math.floor(quotient / divisor),
+        remainder: quotient % divisor,
+    };
 };
