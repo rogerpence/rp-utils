@@ -1,13 +1,8 @@
 {
-    "dependencies": {
-        "@types/js-yaml": "^4.0.9",
-        "@types/node": "^22.19.1",
-        "ansis": "^4.2.0",
-        "js-yaml": "^4.1.1"
-    },
-    "devDependencies": {
-        "zod": "^4.1.12"
-    },
+    "name": "@rogerpence/rp-utils",
+    "version": "1.0.19",
+    "type": "module",
+    "main": "./src/index.js",
     "exports": {
         ".": "./src/index.ts",
         "./console": "./src/console.ts",
@@ -18,16 +13,21 @@
         "./objects": "./src/objects.ts",
         "./string": "./src/string.ts"
     },
-    "files": [
-        "src"
-    ],
-    "main": "./src/index.js",
-    "name": "@rogerpence/rp-utils",
     "scripts": {
         "docs": "typedoc --out ./docs --darkHighlightTheme github-dark",
         "run-tests": "vitest run",
         "watch-tests": "vitest"
     },
-    "type": "module",
-    "version": "1.0.20"
+    "files": [
+        "src"
+    ],
+    "dependencies": {
+        "@types/js-yaml": "^4.0.9",
+        "@types/node": "^22.19.1",
+        "ansis": "^4.2.0",
+        "js-yaml": "^4.1.1"
+    },
+    "devDependencies": {
+        "zod": "^4.1.12"
+    }
 }
