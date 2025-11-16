@@ -108,6 +108,11 @@ export const getFileContents = (filePath: string): string => {
  * @param segments
  * @returns fully-qualified path to the file specified.
  *
+ * @example
+ * const outputFilePath = getPathForCli('markdown-objects.json');
+ * //outputPath = blah/blah/src/lib/data/markdown-objects.json
+ *
+ * @remarks
  * This function is for use only for CLI use in the dev
  * environment. It will not work in a serverless deployment
  * environment.

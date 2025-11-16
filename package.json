@@ -13,6 +13,11 @@
         "./objects": "./src/objects.ts",
         "./string": "./src/string.ts"
     },
+    "scripts": {
+        "docs": "typedoc --out ./docs --darkHighlightTheme github-dark",
+        "run-tests": "vitest run",
+        "watch-tests": "vitest"
+    },
     "files": [
         "src"
     ],
@@ -21,5 +26,8 @@
         "@types/node": "^22.19.1",
         "ansis": "^4.2.0",
         "js-yaml": "^4.1.1"
+    },
+    "devDependencies": {
+        "zod": "^4.1.12"
     }
 }
