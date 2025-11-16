@@ -1,6 +1,6 @@
 {
     "name": "@rogerpence/rp-utils",
-    "version": "1.0.19",
+    "version": "1.0.20",
     "type": "module",
     "main": "./src/index.js",
     "exports": {
@@ -18,9 +18,7 @@
         "run-tests": "vitest run",
         "watch-tests": "vitest"
     },
-    "files": [
-        "src"
-    ],
+    "files": ["src"],
     "dependencies": {
         "@types/js-yaml": "^4.0.9",
         "@types/node": "^22.19.1",
