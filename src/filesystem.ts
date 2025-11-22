@@ -103,6 +103,34 @@ export const getFileContents = (filePath: string): string => {
     return fileContents;
 };
 
+export function getProjectRoot(): string {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+    // Find package.json by going up the directory tree
+    let currentPath = __dirname;
+    while (currentPath !== path.parse(currentPath).root) {
+        if (fs.existsSync(path.join(currentPath, "package.json"))) {
+            return currentPath;
+        }
+        currentPath = path.dirname(currentPath);
+    }
+    throw new Error("Could not find project root");
+}
+
+export function getFullPath(additionalPath: string): string {
+    const projectRoot = getProjectRoot();
+
+    const segments = additionalPath.split(/\s*\\\s*/);
+
+    const resultPath = path.join(projectRoot, ...segments);
+
+    if (!fs.existsSync(resultPath)) {
+        throw new Error(`Path doesn't exist: ${resultPath}`);
+    }
+
+    return resultPath;
+}
+
 /**
  *
  * @param segments
@@ -116,6 +144,8 @@ export const getFileContents = (filePath: string): string => {
  * This function is for use only for CLI use in the dev
  * environment. It will not work in a serverless deployment
  * environment.
+ *
+ * This function works only for files with 'src' in their path.
  *
  * This function is usually used to get a fully-qualified
  * file name in the '../src/lib/data' directory for CLI
@@ -133,14 +163,46 @@ export const getFileContents = (filePath: string): string => {
  * .../src/markdown/kb/test.json
  */
 
-export function getPathForCli(...segments: string[]): string {
+// export function getPathForCli(...segments: string[]): string {
+//     // Regardless of where this source file is located, results
+//     // are always under SvelteKit's 'src' folder.
+
+//     const currentFilePath = process.cwd();
+//     if (!currentFilePath.includes("src")) {
+//         // throw exception
+//     }
+
+//     const srcPath = truncatePathAfterDirectory(currentFilePath, "src");
+
+//     if (segments.length == 1) {
+//         segments.push();
+//         segments = ["lib", "data", ...segments];
+//     }
+
+//     return path.join(srcPath, ...segments);
+// }
+
+export function getPathForCli(
+    initialDirectory: string,
+    ...segments: string[]
+): string {
     // Regardless of where this source file is located, results
     // are always under SvelteKit's 'src' folder.
-    const srcPath = truncatePathAfterDirectory(process.cwd(), "src");
 
-    if (segments.length == 1) {
-        segments.push();
-        segments = ["lib", "data", ...segments];
+    const currentFilePath = process.cwd();
+    console.log(currentFilePath);
+
+    if (!currentFilePath.includes(initialDirectory)) {
+        console.error(`The ${initialDirectory} is not in ${currentFilePath}`);
+    }
+
+    const srcPath = truncatePathAfterDirectory(
+        currentFilePath,
+        initialDirectory
+    );
+
+    if (initialDirectory === "src" && segments.length == 0) {
+        segments = ["lib", "data"];
     }
 
     return path.join(srcPath, ...segments);

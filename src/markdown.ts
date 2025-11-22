@@ -1,7 +1,7 @@
 import * as yaml from "js-yaml";
 
 import fs, { promises as fsa } from "fs";
-import { getPathForCli, getAllDirEntries, writeTextFile } from "./filesystem";
+import { getFullPath, getAllDirEntries, writeTextFile } from "./filesystem";
 import { formatDateToYYYYMMDD } from "./date";
 
 import { z } from "zod";
@@ -59,7 +59,7 @@ type MarkdownObjectsValidtState = {
  *   console.log(`Title: ${note.markdownObject.frontMatter.title}`);
  * });
  */
-async function getMarkdownObjects<T extends Record<string, any>>(
+export async function getMarkdownObjects<T extends Record<string, any>>(
     folder: string
 ): Promise<MarkdownFileResult<T>[]> {
     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
@@ -110,9 +110,10 @@ async function getMarkdownObjects<T extends Record<string, any>>(
  *   console.error('Validation failed. Check error file for details.');
  * }
  */
-function validateMarkdownObjects<T extends Record<string, any>>(
+export function validateMarkdownObjects<T extends Record<string, any>>(
     objects: MarkdownFileResult<T>[],
-    schema: z.ZodSchema<T>
+    schema: z.ZodSchema<T>,
+    showErrors: boolean = true
 ): MarkdownObjectsValidtState {
     const validationErrors: string[] = [];
     const now = new Date();
@@ -125,14 +126,17 @@ function validateMarkdownObjects<T extends Record<string, any>>(
 
     objects.map(async (obj) => {
         const result = schema.safeParse(obj.markdownObject.frontMatter);
+        // console.jsonString(result);
 
         if (!result.success) {
-            console.error(`\n❌ Validation failure: ${obj.dirent.name}`);
             const fullFilename = path.join(obj.dirent.name, obj.dirent.name);
-            console.error(`File:${fullFilename}`);
-            console.error("Errors:");
+            if (showErrors) {
+                console.error(`\n❌ Validation failure: ${obj.dirent.name}`);
+                console.error(`File:${fullFilename}`);
+                console.error("Errors:");
+            }
             result.error.issues.forEach((issue) => {
-                console.warn(`  - ${issue.path.join(".")}: ${issue.message}`);
+                //console.warn(` - ${issue.path.join(".")}: ${issue.message}`);
                 validationErrors.push(
                     `${fullFilename}  - ${issue.path.join(".")}: ${
                         issue.message
@@ -145,8 +149,11 @@ function validateMarkdownObjects<T extends Record<string, any>>(
     });
 
     if (validationErrors.length > 1) {
-        const errorFilePath = getPathForCli("markdown-validation-errors.txt");
-        writeTextFile(validationErrors.join("\n"), errorFilePath);
+        const errorFilePath = getFullPath("tests\\test-data\\output");
+        writeTextFile(
+            validationErrors.join("\n"),
+            path.join(errorFilePath, "markdown-validation-errors.txt")
+        );
         console.error(`See validate error file: ${errorFilePath}`);
     }
 
