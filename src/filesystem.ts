@@ -136,6 +136,7 @@ export function getProjectRoot(filePath: string): string {
  * Get a path appeneded to the project root.
  * @param filePath - The fully path of a TypeScript file. Can either a File URL or simple full path.
  * @param additionalPath - The desired path fragment off of the root.
+ * @param fileName - Optional file name to append to the end of the path.
  * @returns A path from the project root.
  * @remarks
  * _IMPORTANT NOTE:_ This function is for use only for CLI use in the dev
@@ -163,20 +164,29 @@ export function getProjectRoot(filePath: string): string {
  * ```
  * "tests\\test-data\\markdown"
  * ```
-  * The result is:
+ * The result is:
  * ```
  * "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
  * ```
+ *
  */
-export function getFullPath(filePath: string, additionalPath: string): string {
+export function getFullPath(
+    filePath: string,
+    additionalPath: string,
+    fileName?: string
+): string {
     const projectRoot = getProjectRoot(filePath);
 
     const segments = additionalPath.split(/\s*\\\s*/);
 
-    const resultPath = path.join(projectRoot, ...segments);
+    let resultPath = path.join(projectRoot, ...segments);
 
     if (!fs.existsSync(resultPath)) {
         throw new Error(`Path doesn't exist: ${resultPath}`);
+    }
+
+    if (fileName) {
+        resultPath = path.join(resultPath, fileName);
     }
 
     return resultPath;

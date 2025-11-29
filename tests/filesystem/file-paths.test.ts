@@ -20,9 +20,18 @@ describe("test file path stuff", () => {
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
             );
 
-            const path = getFullPath(fileURLToPath(import.meta.url), "tests");
+            let path = getFullPath(fileURLToPath(import.meta.url), "tests");
             expect(path).toBe(
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests"
+            );
+
+            path = getFullPath(
+                fileURLToPath(import.meta.url),
+                "tests",
+                "testfile.json"
+            );
+            expect(path).toBe(
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\testfile.json"
             );
         });
     });
