@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { getFullPath } from "../getfolder";
+import { getFullPath } from "../../src/filesystem";
 
 import {
     getMarkdownObjects,
@@ -17,6 +17,7 @@ describe("get markdown docs", () => {
     describe("read four markdown documents", () => {
         it("should show success", async () => {
             const markdownDataPath = getFullPath(
+                import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
             const markdownObjects =
@@ -29,6 +30,7 @@ describe("get markdown docs", () => {
     describe("read and validate four markdown documents", () => {
         it("should show success", async () => {
             const markdownDataPath = getFullPath(
+                import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
             const markdownObjects =
@@ -45,8 +47,11 @@ describe("get markdown docs", () => {
         });
     });
     describe("read and validate one markdown document", () => {
-        it("should show success", async () => {
+        const x = import.meta.url;
+
+        it("should show success 3", async () => {
             const markdownDataPath = getFullPath(
+                import.meta.url,
                 "tests\\test-data\\markdown\\one-malformed-frontmatter"
             );
 

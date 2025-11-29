@@ -10,13 +10,17 @@ const __dirname = path.dirname(__filename);
 describe("test file path stuff", () => {
     describe("getProjectRoot", () => {
         it("should show success", () => {
-            const root = getProjectRoot();
-            const path = getFullPath("tests");
-
+            let root = getProjectRoot(fileURLToPath(import.meta.url));
             expect(root).toBe(
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
             );
 
+            root = getProjectRoot(import.meta.url);
+            expect(root).toBe(
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
+            );
+
+            const path = getFullPath(fileURLToPath(import.meta.url), "tests");
             expect(path).toBe(
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests"
             );

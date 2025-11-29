@@ -3,6 +3,7 @@ import * as yaml from "js-yaml";
 import fs, { promises as fsa } from "fs";
 import { getFullPath, getAllDirEntries, writeTextFile } from "./filesystem";
 import { formatDateToYYYYMMDD } from "./date";
+import { fileURLToPath } from "url";
 
 import { z } from "zod";
 import path from "path";
@@ -29,7 +30,7 @@ export type MarkdownObjectsCollection<T> = {
     collection: MarkdownFileResult<T>[];
 };
 
-type MarkdownObjectsValidtState = {
+export type MarkdownObjectsValidtState = {
     filesFound: number;
     filesValid: number;
     validationErrors: string[];
@@ -149,7 +150,10 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     });
 
     if (validationErrors.length > 1) {
-        const errorFilePath = getFullPath("tests\\test-data\\output");
+        const errorFilePath = getFullPath(
+            import.meta.url,
+            "tests\\test-data\\output"
+        );
         writeTextFile(
             validationErrors.join("\n"),
             path.join(errorFilePath, "markdown-validation-errors.txt")
@@ -164,98 +168,98 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     };
 }
 
-/**
- *
- * @param folder - top-level markdown folder
- * @param schema - Zod markdown schema
- * @return {Promise<MarkdownObjectsCollection<T>>} A promise resolving to an object with:
- *   - filesFound: Total number of markdown files found
- *   - filesValid: Number of files that passed schema validation
- *   - collection: Array of validated markdown file results with dirent and parsed content
- * @example
- * ```
- * import * as z from 'zod';
- *
- * export const TechnicalNoteFrontmatterSchema = z
- *	.object({
- *		title: z.string(),
- *		description: z.string(),
- *		date_created: z.string(),
- *		date_updated: z.string(),
- *		date_published: z.string().nullable().optional(),
- *		pinned: z.boolean(),
- *		tags: z.array(z.string())
- *	})
- *	.strict();
- *
- * export type TechnicalNoteFrontmatter = z.infer<typeof TechnicalNoteFrontmatterSchema>;
- *
- * const markdownObjects = await getMarkdownCollection<TechnicalNoteFrontmatter>(
- *	  markdownDirectory,
- *	  TechnicalNoteFrontmatterSchema
- * );
- *```
- */
-export async function getMarkdownCollection<T extends Record<string, any>>(
-    folder: string,
-    schema: z.ZodSchema<T>
-): Promise<MarkdownObjectsCollection<T>> {
-    const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
+// /**
+//  *
+//  * @param folder - top-level markdown folder
+//  * @param schema - Zod markdown schema
+//  * @return {Promise<MarkdownObjectsCollection<T>>} A promise resolving to an object with:
+//  *   - filesFound: Total number of markdown files found
+//  *   - filesValid: Number of files that passed schema validation
+//  *   - collection: Array of validated markdown file results with dirent and parsed content
+//  * @example
+//  * ```
+//  * import * as z from 'zod';
+//  *
+//  * export const TechnicalNoteFrontmatterSchema = z
+//  *	.object({
+//  *		title: z.string(),
+//  *		description: z.string(),
+//  *		date_created: z.string(),
+//  *		date_updated: z.string(),
+//  *		date_published: z.string().nullable().optional(),
+//  *		pinned: z.boolean(),
+//  *		tags: z.array(z.string())
+//  *	})
+//  *	.strict();
+//  *
+//  * export type TechnicalNoteFrontmatter = z.infer<typeof TechnicalNoteFrontmatterSchema>;
+//  *
+//  * const markdownObjects = await getMarkdownCollection<TechnicalNoteFrontmatter>(
+//  *	  markdownDirectory,
+//  *	  TechnicalNoteFrontmatterSchema
+//  * );
+//  *```
+//  */
+// export async function getMarkdownCollection<T extends Record<string, any>>(
+//     folder: string,
+//     schema: z.ZodSchema<T>
+// ): Promise<MarkdownObjectsCollection<T>> {
+//     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
 
-    const validationErrors: string[] = [];
-    const now = new Date();
-    validationErrors.push(
-        `${formatDateToYYYYMMDD(now)} ${now.toLocaleTimeString()}`
-    );
+//     const validationErrors: string[] = [];
+//     const now = new Date();
+//     validationErrors.push(
+//         `${formatDateToYYYYMMDD(now)} ${now.toLocaleTimeString()}`
+//     );
 
-    const filesFound = fileInfo.length;
-    let filesValid = 0;
+//     const filesFound = fileInfo.length;
+//     let filesValid = 0;
 
-    const collectionResults = await Promise.all(
-        fileInfo.map(async (fi) => {
-            const fullFilename = path.join(fi.parentPath, fi.name);
+//     const collectionResults = await Promise.all(
+//         fileInfo.map(async (fi) => {
+//             const fullFilename = path.join(fi.parentPath, fi.name);
 
-            const markdownObject = await parseMarkdownFile<T>(fullFilename);
+//             const markdownObject = await parseMarkdownFile<T>(fullFilename);
 
-            const result = schema.safeParse(markdownObject.frontMatter);
+//             const result = schema.safeParse(markdownObject.frontMatter);
 
-            if (!result.success) {
-                console.error(`\n❌ Validation failure: ${fi.name}`);
-                console.error(`File: ${fullFilename}`);
-                console.error("Errors:");
-                result.error.issues.forEach((issue) => {
-                    console.warn(
-                        `  - ${issue.path.join(".")}: ${issue.message}`
-                    );
-                    validationErrors.push(
-                        `${fullFilename}  - ${issue.path.join(".")}: ${
-                            issue.message
-                        }`
-                    );
-                });
-            } else {
-                filesValid++;
-                // console.success('success');
-            }
-            return {
-                dirent: fi,
-                markdownObject,
-            };
-        })
-    );
+//             if (!result.success) {
+//                 console.error(`\n❌ Validation failure: ${fi.name}`);
+//                 console.error(`File: ${fullFilename}`);
+//                 console.error("Errors:");
+//                 result.error.issues.forEach((issue) => {
+//                     console.warn(
+//                         `  - ${issue.path.join(".")}: ${issue.message}`
+//                     );
+//                     validationErrors.push(
+//                         `${fullFilename}  - ${issue.path.join(".")}: ${
+//                             issue.message
+//                         }`
+//                     );
+//                 });
+//             } else {
+//                 filesValid++;
+//                 // console.success('success');
+//             }
+//             return {
+//                 dirent: fi,
+//                 markdownObject,
+//             };
+//         })
+//     );
 
-    if (validationErrors.length > 0) {
-        const errorFilePath = getPathForCli("markdown-validation-errors.txt");
-        writeTextFile(validationErrors.join("\n"), errorFilePath);
-        console.error(`See validate error file: ${errorFilePath}`);
-    }
+//     if (validationErrors.length > 0) {
+//         const errorFilePath = getPathForCli("markdown-validation-errors.txt");
+//         writeTextFile(validationErrors.join("\n"), errorFilePath);
+//         console.error(`See validate error file: ${errorFilePath}`);
+//     }
 
-    return {
-        filesFound,
-        filesValid,
-        collection: collectionResults,
-    };
-}
+//     return {
+//         filesFound,
+//         filesValid,
+//         collection: collectionResults,
+//     };
+// }
 
 /**
  * Parses a markdown file with optional YAML frontmatter

@@ -89,6 +89,7 @@ export const getAllDirEntries = (
  * @param filePath - fully-qualified file name.
  *
  * @returns file contents
+ *
  */
 export const getFileContents = (filePath: string): string => {
     if (!fs.existsSync(filePath)) {
@@ -103,8 +104,22 @@ export const getFileContents = (filePath: string): string => {
     return fileContents;
 };
 
-export function getProjectRoot(): string {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+/**
+ * Get the project root path.
+ * @param filePath - The fully path of a TypeScript file. Can either a File URL or simple full path.
+ * @returns The file's project root.
+ *
+ * @remarks
+ * This function is for use only for CLI use in the dev
+ * environment. It will not work in a serverless deployment
+ * environment.
+ *
+ */
+export function getProjectRoot(filePath: string): string {
+    if (filePath.startsWith("file:")) {
+        filePath = fileURLToPath(filePath);
+    }
+    const __dirname = path.dirname(filePath);
 
     // Find package.json by going up the directory tree
     let currentPath = __dirname;
@@ -117,8 +132,44 @@ export function getProjectRoot(): string {
     throw new Error("Could not find project root");
 }
 
-export function getFullPath(additionalPath: string): string {
-    const projectRoot = getProjectRoot();
+/**
+ * Get a path appeneded to the project root.
+ * @param filePath - The fully path of a TypeScript file. Can either a File URL or simple full path.
+ * @param additionalPath - The desired path fragment off of the root.
+ * @returns A path from the project root.
+ * @remarks
+ * _IMPORTANT NOTE:_ This function is for use only for CLI use in the dev
+ * environment. It will not work in a serverless deployment
+ * environment.
+ * @example
+ * ```
+ * const markdownDataPath = getFullPath(
+ *       import.meta.url,
+ *       "tests\\test-data\\markdown"
+ * )
+ * ```
+ * or
+ * ```
+ * const markdownDataPath = getFullPath(
+ *       "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\src\\markdown.ts"
+ *       "tests\\test-data\\markdown"
+ * )
+ * ```
+ * If the `filePath` is
+ * ```
+ * "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
+ * ```
+ * and the `additionalPath` is:
+ * ```
+ * "tests\\test-data\\markdown"
+ * ```
+  * The result is:
+ * ```
+ * "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
+ * ```
+ */
+export function getFullPath(filePath: string, additionalPath: string): string {
+    const projectRoot = getProjectRoot(filePath);
 
     const segments = additionalPath.split(/\s*\\\s*/);
 
@@ -131,37 +182,37 @@ export function getFullPath(additionalPath: string): string {
     return resultPath;
 }
 
-/**
- *
- * @param segments
- * @returns fully-qualified path to the file specified.
- *
- * @example
- * const outputFilePath = getPathForCli('markdown-objects.json');
- * //outputPath = blah/blah/src/lib/data/markdown-objects.json
- *
- * @remarks
- * This function is for use only for CLI use in the dev
- * environment. It will not work in a serverless deployment
- * environment.
- *
- * This function works only for files with 'src' in their path.
- *
- * This function is usually used to get a fully-qualified
- * file name in the '../src/lib/data' directory for CLI
- * reading and writing purposes.
- *
- * If only a single element is passed, that element is assumed
- * to be a file name in the /src/lib/data folder and a
- * fully-qualifed reference to that file name is returned.
- *
- * If multiple elements are passed, the last elenent is assumed
- * to be a file name, the preceding elements are folder names
- * under the 'src' folder. For example:
- *  const x = getPathForCli('markdown', 'kb', 'test.json')
- * returns the the fully qualified file name for
- * .../src/markdown/kb/test.json
- */
+// /**
+//  *
+//  * @param segments
+//  * @returns fully-qualified path to the file specified.
+//  *
+//  * @example
+//  * const outputFilePath = getPathForCli('markdown-objects.json');
+//  * //outputPath = blah/blah/src/lib/data/markdown-objects.json
+//  *
+//  * @remarks
+//  * This function is for use only for CLI use in the dev
+//  * environment. It will not work in a serverless deployment
+//  * environment.
+//  *
+//  * This function works only for files with 'src' in their path.
+//  *
+//  * This function is usually used to get a fully-qualified
+//  * file name in the '../src/lib/data' directory for CLI
+//  * reading and writing purposes.
+//  *
+//  * If only a single element is passed, that element is assumed
+//  * to be a file name in the /src/lib/data folder and a
+//  * fully-qualifed reference to that file name is returned.
+//  *
+//  * If multiple elements are passed, the last elenent is assumed
+//  * to be a file name, the preceding elements are folder names
+//  * under the 'src' folder. For example:
+//  *  const x = getPathForCli('markdown', 'kb', 'test.json')
+//  * returns the the fully qualified file name for
+//  * .../src/markdown/kb/test.json
+//  */
 
 // export function getPathForCli(...segments: string[]): string {
 //     // Regardless of where this source file is located, results
@@ -182,49 +233,49 @@ export function getFullPath(additionalPath: string): string {
 //     return path.join(srcPath, ...segments);
 // }
 
-export function getPathForCli(
-    initialDirectory: string,
-    ...segments: string[]
-): string {
-    // Regardless of where this source file is located, results
-    // are always under SvelteKit's 'src' folder.
+// export function getPathForCli(
+//     initialDirectory: string,
+//     ...segments: string[]
+// ): string {
+//     // Regardless of where this source file is located, results
+//     // are always under SvelteKit's 'src' folder.
 
-    const currentFilePath = process.cwd();
-    console.log(currentFilePath);
+//     const currentFilePath = process.cwd();
+//     console.log(currentFilePath);
 
-    if (!currentFilePath.includes(initialDirectory)) {
-        console.error(`The ${initialDirectory} is not in ${currentFilePath}`);
-    }
+//     if (!currentFilePath.includes(initialDirectory)) {
+//         console.error(`The ${initialDirectory} is not in ${currentFilePath}`);
+//     }
 
-    const srcPath = truncatePathAfterDirectory(
-        currentFilePath,
-        initialDirectory
-    );
+//     const srcPath = truncatePathAfterDirectory(
+//         currentFilePath,
+//         initialDirectory
+//     );
 
-    if (initialDirectory === "src" && segments.length == 0) {
-        segments = ["lib", "data"];
-    }
+//     if (initialDirectory === "src" && segments.length == 0) {
+//         segments = ["lib", "data"];
+//     }
 
-    return path.join(srcPath, ...segments);
-}
+//     return path.join(srcPath, ...segments);
+// }
 
-/**
- *
- * @param currentMetaUrl
- * @returns current parent path
- * @example
- * Pass in import.meta.url value of current file to get
- * its parent folder.
- * ```
- * const folder = getParentPath(import.meta.url);
- * ```
- * @remarks This is for use with CLI code only. Do not use on serverless environments.
- */
-export function getParentPath(currentMetaUrl: string): string {
-    const fullFilePath = fileURLToPath(currentMetaUrl);
+// /**
+//  *
+//  * @param currentMetaUrl
+//  * @returns current parent path
+//  * @example
+//  * Pass in import.meta.url value of current file to get
+//  * its parent folder.
+//  * ```
+//  * const folder = getParentPath(import.meta.url);
+//  * ```
+//  * @remarks This is for use with CLI code only. Do not use on serverless environments.
+//  */
+// export function getParentPath(currentMetaUrl: string): string {
+//     const fullFilePath = fileURLToPath(currentMetaUrl);
 
-    return path.dirname(fullFilePath);
-}
+//     return path.dirname(fullFilePath);
+// }
 
 /**
  *
