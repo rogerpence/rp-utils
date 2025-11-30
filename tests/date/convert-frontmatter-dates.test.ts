@@ -80,11 +80,12 @@ describe("convertFrontmatterDateStrings", () => {
         expect(result.badDate).toBe("2025-99-99");
         expect(consoleMock).toHaveBeenCalled();
 
-        afterAll(() => {
-            consoleMock.mockReset(); // Reset the mock after all tests in this suite
-        });
+        // afterAll(() => {
+        //     consoleMock.mockReset(); // Reset the mock after all tests in this suite
+        //     console.info("afterAll-----------------------------------");
+        // });
 
-        // consoleSpy.mockRestore();
+        consoleMock.mockRestore();
     });
 
     it("should convert YYYY-MM-DD strings to Date objects", () => {

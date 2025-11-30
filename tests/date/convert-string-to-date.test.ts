@@ -91,7 +91,6 @@ describe("parseYYYYMMDDToDate", () => {
     it("should round-trip with formatDateToYYYYMMDD", () => {
         const original = "2025-11-15";
         const date = convertStringYYYY_MM_DDToDate(original);
-        //queueMicrotask;
         const formatted = convertDateToStringYYYY_MM_DD(date);
         expect(formatted).toBe(original);
 
