@@ -59,7 +59,7 @@ export const convertFrontmatterDateStrings = <T extends Record<string, any>>(
  * formatDateToYYYYMMDD(date); // Returns "2025-11-15"
  * ```
  */
-export const formatDateToYYYYMMDD = (date: Date): string => {
+export const convertDateToStringYYYY_MM_DD = (date: Date): string => {
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
