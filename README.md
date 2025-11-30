@@ -1,3 +1,3 @@
 # TypeScript utility functions
 
-[https://rogerpence.github.io/rp-utils/](Documentation)
+[Documentation](https://rogerpence.github.io/rp-utils/)
