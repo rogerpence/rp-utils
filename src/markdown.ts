@@ -13,7 +13,7 @@ export interface ParsedMarkdown<
 > {
     frontMatter: T;
     content: string;
-    rawFrontMatter?: string;
+    // rawFrontMatter?: string;
 }
 
 export type MarkdownFileResult<T> = {
@@ -337,7 +337,7 @@ export const parseMarkdownFile = async <
         return {
             frontMatter: parsedFrontMatter as T,
             content: contentLines.join("\n"),
-            rawFrontMatter: rawFrontMatter || undefined,
+            //rawFrontMatter: rawFrontMatter || undefined,
         };
     } catch (error) {
         throw new Error(`Failed to parse markdown file ${filename}: ${error}`);
