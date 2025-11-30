@@ -13,8 +13,9 @@ export interface ParsedMarkdown<
 > {
     frontMatter: T;
     content: string;
-    // rawFrontMatter?: string;
 }
+
+// rawFrontMatter?: string;
 
 export type MarkdownFileResult<T> = {
     dirent: fs.Dirent;
