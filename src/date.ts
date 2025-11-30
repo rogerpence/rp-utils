@@ -80,7 +80,8 @@ export const convertDateToStringYYYY_MM_DD = (date: Date): string => {
  * parseYYYYMMDDToDate('11-15-2025'); // Throws Error: Invalid format
  * ```
  */
-export const convertYYYYMMDDToDate = (dateString: string): Date => {
+//export const convertYYYYMMDDToDate = (dateString: string): Date => {
+export const convertStringYYYY_MM_DDToDate = (dateString: string): Date => {
     // Validate input is a string
     if (typeof dateString !== "string") {
         throw new Error("Input must be a string");

@@ -2,7 +2,7 @@ import * as yaml from "js-yaml";
 
 import fs, { promises as fsa } from "fs";
 import { getAppPath, getAllDirEntries, writeTextFile } from "./filesystem";
-import { formatDateToYYYYMMDD } from "./date";
+import { convertDateToStringYYYY_MM_DD } from "./date";
 import { fileURLToPath } from "url";
 
 import { z } from "zod";
@@ -119,7 +119,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     const validationErrors: string[] = [];
     const now = new Date();
     validationErrors.push(
-        `${formatDateToYYYYMMDD(now)} ${now.toLocaleTimeString()}`
+        `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
     );
 
     let filesFound = objects.length;
