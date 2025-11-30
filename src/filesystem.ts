@@ -133,7 +133,9 @@ export function getProjectRoot(filePath: string): string {
 }
 
 /**
- * Get a path appeneded to the project root.
+ * Get a path appeneded to the project root. This function makes it easy to get a file path inside a project for CLI work (mostly to read and write to JSON and markdown files). It dispenses with worrying about `../../` nonsense.
+ *
+ * This function is for use specifically for CLI work. It does not work on serverless environments.
  * @param filePath - The fully path of a TypeScript file. Can either a File URL or simple full path.
  * @param additionalPath - The desired path fragment off of the root.
  * @param fileName - Optional file name to append to the end of the path.
@@ -170,7 +172,7 @@ export function getProjectRoot(filePath: string): string {
  * ```
  *
  */
-export function getFullPath(
+export function getAppPath(
     filePath: string,
     additionalPath: string,
     fileName?: string
@@ -301,7 +303,7 @@ export function getFullPath(
  * @remarks An error occurs and processing stops if 'fullPath' doesn't
  * include the 'lastDirectory' folder.
  */
-export function truncatePathAfterDirectory(
+export function getTruncatedPath(
     fullPath: string,
     lastDirectory: string
 ): string {

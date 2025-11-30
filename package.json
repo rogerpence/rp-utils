@@ -14,7 +14,7 @@
         "./string": "./src/string.ts"
     },
     "scripts": {
-        "docs": "typedoc --out ./docs --darkHighlightTheme github-dark",
+        "build-docs": "typedoc --out ./docs --darkHighlightTheme github-dark",
         "run-tests": "vitest run",
         "run-tests-debug": "vitest run --inspect-brk",
         "watch-tests": "vitest"

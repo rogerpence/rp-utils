@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { getFullPath } from "../../src/filesystem";
+import { getAppPath } from "../../src/filesystem";
 
 import {
     getMarkdownObjects,
@@ -16,7 +16,7 @@ import {
 describe("get markdown docs", () => {
     describe("read four markdown documents", () => {
         it("should show success", async () => {
-            const markdownDataPath = getFullPath(
+            const markdownDataPath = getAppPath(
                 import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
@@ -29,7 +29,7 @@ describe("get markdown docs", () => {
     });
     describe("read and validate four markdown documents", () => {
         it("should show success", async () => {
-            const markdownDataPath = getFullPath(
+            const markdownDataPath = getAppPath(
                 import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
@@ -50,7 +50,7 @@ describe("get markdown docs", () => {
         const x = import.meta.url;
 
         it("should show success 3", async () => {
-            const markdownDataPath = getFullPath(
+            const markdownDataPath = getAppPath(
                 import.meta.url,
                 "tests\\test-data\\markdown\\one-malformed-frontmatter"
             );

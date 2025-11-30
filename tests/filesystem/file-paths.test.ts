@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getFullPath, getProjectRoot } from "../../src/filesystem";
+import { getAppPath, getProjectRoot } from "../../src/filesystem";
 import { fileURLToPath } from "url";
 import path from "path";
 const fs = require("fs");
@@ -20,12 +20,12 @@ describe("test file path stuff", () => {
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
             );
 
-            let path = getFullPath(fileURLToPath(import.meta.url), "tests");
+            let path = getAppPath(fileURLToPath(import.meta.url), "tests");
             expect(path).toBe(
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests"
             );
 
-            path = getFullPath(
+            path = getAppPath(
                 fileURLToPath(import.meta.url),
                 "tests",
                 "testfile.json"

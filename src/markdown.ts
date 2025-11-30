@@ -1,7 +1,7 @@
 import * as yaml from "js-yaml";
 
 import fs, { promises as fsa } from "fs";
-import { getFullPath, getAllDirEntries, writeTextFile } from "./filesystem";
+import { getAppPath, getAllDirEntries, writeTextFile } from "./filesystem";
 import { formatDateToYYYYMMDD } from "./date";
 import { fileURLToPath } from "url";
 
@@ -150,7 +150,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     });
 
     if (validationErrors.length > 1) {
-        const errorFilePath = getFullPath(
+        const errorFilePath = getAppPath(
             import.meta.url,
             "tests\\test-data\\output"
         );
