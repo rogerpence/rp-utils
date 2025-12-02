@@ -14,7 +14,7 @@ import {
 } from "../obsidan-types";
 
 describe("get markdown docs", () => {
-    describe("read four markdown documents", () => {
+    describe("-t ", () => {
         it("should show success", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
@@ -27,6 +27,7 @@ describe("get markdown docs", () => {
             expect(markdownObjects.length).toBe(4);
         });
     });
+
     describe("read and validate four markdown documents", () => {
         it("should show success", async () => {
             const markdownDataPath = getAppPath(
@@ -46,6 +47,31 @@ describe("get markdown docs", () => {
             expect(markdownValidator.validationErrors.length).toBe(1);
         });
     });
+
+    describe("read four markdown documents--one of which has a frontmatter error", () => {
+        it("should show success", async () => {
+            const markdownDataPath = getAppPath(
+                import.meta.url,
+                "tests\\test-data\\markdown\\one-bad"
+            );
+            const markdownObjects =
+                await getMarkdownObjects<TechnicalNoteFrontmatter>(
+                    markdownDataPath
+                );
+            expect(markdownObjects.length).toBe(4);
+
+            const markdownValidator =
+                validateMarkdownObjects<TechnicalNoteFrontmatter>(
+                    markdownObjects,
+                    TechnicalNoteFrontmatterSchema,
+                    false
+                );
+
+            expect(markdownValidator.filesValid).toBe(3);
+            expect(markdownValidator.filesFound).toBe(4);
+        });
+    });
+
     describe("read and validate one markdown document", () => {
         const x = import.meta.url;
 

@@ -1,12 +1,18 @@
 import * as yaml from "js-yaml";
 
 import fs, { promises as fsa } from "fs";
-import { getAppPath, getAllDirEntries, writeTextFile } from "./filesystem";
+import {
+    deleteFile,
+    getAppPath,
+    getAllDirEntries,
+    writeTextFile,
+} from "./filesystem";
 import { convertDateToStringYYYY_MM_DD } from "./date";
 import { fileURLToPath } from "url";
 
 import { z } from "zod";
 import path from "path";
+import { error } from "console";
 
 export interface ParsedMarkdown<
     T extends Record<string, any> = Record<string, any>
@@ -79,6 +85,8 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
         })
     );
 
+    // console.jsonString(collectionResults);
+
     return collectionResults;
 }
 
@@ -93,7 +101,15 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  * @param {MarkdownFileResult<T>[]} objects - Array of parsed Markdown file results to validate
  * @param {z.ZodSchema<T>} schema - Zod schema to validate frontmatter against
  * @returns {MarkdownObjectsValidtState} Object containing validation statistics and error messages
- *
+ * ```
+ * type MarkdownObjectsValidtState = {
+ *       filesFound: number;
+ *        filesValid: number;
+ *        validationErrors: string[];
+ * }
+ * ```
+};
+ * 
  * @example
  * Validate markdown objects and check results
  * const markdownObjects = await getMarkdownObjects<TechnicalNoteFrontmatter>('../markdown');
@@ -117,6 +133,18 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     schema: z.ZodSchema<T>,
     showErrors: boolean = true
 ): MarkdownObjectsValidtState {
+    const errorFilePath = getAppPath(
+        import.meta.url,
+        "tests\\test-data\\output"
+    );
+
+    const fullErrorFilename = path.join(
+        errorFilePath,
+        "markdown-validation-errors.txt"
+    );
+
+    deleteFile(fullErrorFilename);
+
     const validationErrors: string[] = [];
     const now = new Date();
     validationErrors.push(
@@ -151,14 +179,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     });
 
     if (validationErrors.length > 1) {
-        const errorFilePath = getAppPath(
-            import.meta.url,
-            "tests\\test-data\\output"
-        );
-        writeTextFile(
-            validationErrors.join("\n"),
-            path.join(errorFilePath, "markdown-validation-errors.txt")
-        );
+        writeTextFile(validationErrors.join("\n"), fullErrorFilename);
         console.error(`See validate error file: ${errorFilePath}`);
     }
 

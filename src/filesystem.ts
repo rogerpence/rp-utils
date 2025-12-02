@@ -1,7 +1,80 @@
 import "./console";
 import { fileURLToPath } from "url";
 import path from "path";
-import fs from "fs";
+import fs, { promises as fsa } from "fs";
+
+/**
+ * Checks if a file exists at the specified path.
+ *
+ * @param filePath - The path to the file to check
+ * @returns A promise that resolves to true if the file exists, false otherwise
+ *
+ * @example
+ * Check if a file exists:
+ * ```typescript
+ * const exists = await existsFile('path/to/file.txt');
+ * if (exists) {
+ *   console.log('File found!');
+ * }
+ * ```
+ *
+ * @example
+ * Use in conditional logic:
+ * ```typescript
+ * if (await existsFile(errorFilePath)) {
+ *   await fsa.rm(errorFilePath);
+ * }
+ * ```
+ */
+export async function existsFile(filePath: string): Promise<boolean> {
+    try {
+        await fsa.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Deletes a file from the filesystem if it exists.
+ *
+ * @param filePath - The path to the file to delete
+ * @returns A promise that resolves when the file is deleted or doesn't exist
+ *
+ * @remarks
+ * This function silently succeeds if the file doesn't exist (no error is thrown).
+ * If the file exists but cannot be deleted due to permissions or other errors,
+ * the error is logged to the console but the function completes normally.
+ *
+ * @example
+ * Delete a file:
+ * ```typescript
+ * await deleteFile('path/to/file.txt');
+ * console.log('File deleted or did not exist');
+ * ```
+ *
+ * @example
+ * Delete a validation errors file:
+ * ```typescript
+ * const errorFilePath = path.join(
+ *     getAppPath(import.meta.url, "tests\\test-data\\output"),
+ *     "markdown-validation-errors.txt"
+ * );
+ * await deleteFile(errorFilePath);
+ * ```
+ */
+export async function deleteFile(filePath: string): Promise<boolean> {
+    if (await existsFile(filePath)) {
+        try {
+            await fsa.rm(filePath);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    return false;
+}
 
 /**
  * Retrieves directory entries for all files and subdirectories in a directory
