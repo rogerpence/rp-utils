@@ -149,9 +149,6 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
 
     const validationErrors: string[] = [];
     const now = new Date();
-    // validationErrors.push(
-    //     `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
-    // );
 
     let filesFound = objects.length;
     let filesValid = 0;
