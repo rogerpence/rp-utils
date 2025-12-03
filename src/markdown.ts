@@ -132,21 +132,9 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  */
 export function validateMarkdownObjects<T extends Record<string, any>>(
     objects: MarkdownFileResult<T>[],
-    schema: z.ZodSchema<T>,
-    showErrors: boolean = true
+    schema: z.ZodSchema<T>
+    //    showErrors: boolean = true
 ): MarkdownObjectsValidtState {
-    // const errorFilePath = getAppPath(
-    //     import.meta.url,
-    //     "tests\\test-data\\output"
-    // );
-
-    // const fullErrorFilename = path.join(
-    //     errorFilePath,
-    //     "markdown-validation-errors.txt"
-    // );
-
-    //  deleteFile(fullErrorFilename);
-
     const validationErrors: string[] = [];
     const now = new Date();
 
@@ -158,11 +146,11 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
 
         if (!result.success) {
             const fullFilename = path.join(obj.dirent.name, obj.dirent.name);
-            if (showErrors) {
-                console.error(`\n❌ Validation failure: ${obj.dirent.name}`);
-                console.error(`File:${fullFilename}`);
-                console.error("Errors:");
-            }
+            // if (showErrors) {
+            //     console.error(`\n❌ Validation failure: ${obj.dirent.name}`);
+            //     console.error(`File:${fullFilename}`);
+            //     console.error("Errors:");
+            // }
             result.error.issues.forEach((issue) => {
                 validationErrors.push(
                     `${fullFilename}  - ${issue.path.join(".")}: ${
