@@ -112,51 +112,52 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  * 
  * @example
  * Validate markdown objects and check results
+ * ```
  * const markdownObjects = await getMarkdownObjects<TechnicalNoteFrontmatter>('../markdown');
  * const validation = validateMarkdownObjects(markdownObjects, TechnicalNoteFrontmatterSchema);
- *
  * if (validation.filesFound === validation.filesValid) {
  *   console.log('All files valid!');
  * } else {
  *   console.log(`${validation.filesValid}/${validation.filesFound} files are valid`);
  * }
- *
+ * ```
  * @example
  * Handle validation errors
+ * ```
  * const validation = validateMarkdownObjects(objects, schema);
  * if (validation.validationErrors.length > 0) {
  *   console.error('Validation failed. Check error file for details.');
  * }
+ * ```
  */
 export function validateMarkdownObjects<T extends Record<string, any>>(
     objects: MarkdownFileResult<T>[],
     schema: z.ZodSchema<T>,
     showErrors: boolean = true
 ): MarkdownObjectsValidtState {
-    const errorFilePath = getAppPath(
-        import.meta.url,
-        "tests\\test-data\\output"
-    );
+    // const errorFilePath = getAppPath(
+    //     import.meta.url,
+    //     "tests\\test-data\\output"
+    // );
 
-    const fullErrorFilename = path.join(
-        errorFilePath,
-        "markdown-validation-errors.txt"
-    );
+    // const fullErrorFilename = path.join(
+    //     errorFilePath,
+    //     "markdown-validation-errors.txt"
+    // );
 
-    deleteFile(fullErrorFilename);
+    //  deleteFile(fullErrorFilename);
 
     const validationErrors: string[] = [];
     const now = new Date();
-    validationErrors.push(
-        `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
-    );
+    // validationErrors.push(
+    //     `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
+    // );
 
     let filesFound = objects.length;
     let filesValid = 0;
 
     objects.map(async (obj) => {
         const result = schema.safeParse(obj.markdownObject.frontMatter);
-        // console.jsonString(result);
 
         if (!result.success) {
             const fullFilename = path.join(obj.dirent.name, obj.dirent.name);
@@ -166,7 +167,6 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
                 console.error("Errors:");
             }
             result.error.issues.forEach((issue) => {
-                //console.warn(` - ${issue.path.join(".")}: ${issue.message}`);
                 validationErrors.push(
                     `${fullFilename}  - ${issue.path.join(".")}: ${
                         issue.message
@@ -179,8 +179,9 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     });
 
     if (validationErrors.length > 1) {
-        writeTextFile(validationErrors.join("\n"), fullErrorFilename);
-        console.error(`See validate error file: ${errorFilePath}`);
+        validationErrors.unshift(
+            `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
+        );
     }
 
     return {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
+import path from "path";
 
-import { getAppPath } from "../../src/filesystem";
+import { getAppPath, deleteFile, writeTextFile } from "../../src/filesystem";
 
 import {
     getMarkdownObjects,
@@ -14,7 +15,17 @@ import {
 } from "../obsidan-types";
 
 describe("get markdown docs", () => {
-    describe("-t ", () => {
+    const errorFilePath = getAppPath(
+        import.meta.url,
+        "tests\\test-data\\output"
+    );
+
+    const fullErrorFilename = path.join(
+        errorFilePath,
+        "markdown-validation-errors.txt"
+    );
+
+    describe("get-objects-from-all-good", () => {
         it("should show success", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
@@ -44,11 +55,17 @@ describe("get markdown docs", () => {
             );
 
             expect(markdownValidator.filesFound).toBe(4);
-            expect(markdownValidator.validationErrors.length).toBe(1);
+            expect(markdownValidator.validationErrors.length).toBe(0);
+            writeTextFile(
+                markdownValidator.validationErrors.join("\n"),
+                fullErrorFilename
+            );
         });
     });
 
     describe("read four markdown documents--one of which has a frontmatter error", () => {
+        deleteFile(fullErrorFilename);
+
         it("should show success", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
@@ -69,6 +86,13 @@ describe("get markdown docs", () => {
 
             expect(markdownValidator.filesValid).toBe(3);
             expect(markdownValidator.filesFound).toBe(4);
+
+            if (markdownValidator.validationErrors.length > 1) {
+                writeTextFile(
+                    markdownValidator.validationErrors.join("\n"),
+                    fullErrorFilename
+                );
+            }
         });
     });
 
