@@ -23,10 +23,10 @@ export interface ParsedMarkdown<
 
 // rawFrontMatter?: string;
 
-export type MarkdownObjectsCollection<T> = {
+export type MarkdownObjectsCollection = {
     filesFound: number;
     filesValid: number;
-    collection: MarkdownFileResult<T>[];
+    collection: MarkdownFileResult[];
 };
 
 export type MarkdownObjectsValidState = {
@@ -42,19 +42,18 @@ export type MarkdownObjectsValidState = {
  * and returns an array of objects containing both the file system information (Dirent)
  * and the parsed Markdown data.
  *
- * @template T - The expected type of the frontmatter object (must extend Record<string, any>)
  * @param {string} folder - Path to the directory containing Markdown files (can be relative or absolute)
- * @returns {Promise<MarkdownFileResult<T>[]>} Array of objects containing file info and parsed Markdown data
+ * @returns {Promise<MarkdownParseResult>} Object containing successful and failed parse results
  *
  * @example
- * Retrieve all technical notes from a folder
- * const notes = await getMarkdownObjects<TechnicalNoteFrontmatter>('../markdown');
- * console.log(`Found ${notes.length} markdown files`);
+ * Retrieve all markdown files from a folder
+ * const { successful, failed } = await getMarkdownObjects('../markdown');
+ * console.log(`Found ${successful.length} valid files, ${failed.length} failed`);
  *
  * @example
  * Access individual file information
- * const notes = await getMarkdownObjects<TechnicalNoteFrontmatter>('../markdown');
- * notes.forEach(note => {
+ * const { successful } = await getMarkdownObjects('../markdown');
+ * successful.forEach(note => {
  *   console.log(`File: ${note.dirent.name}`);
  *   console.log(`Title: ${note.markdownObject.frontMatter.title}`);
  * });
@@ -82,16 +81,16 @@ export type MarkdownObjectsValidState = {
 //     return collectionResults;
 // }
 
-export type MarkdownFileResult<T> = {
+export type MarkdownFileResult = {
     dirent: fs.Dirent;
     markdownObject: {
-        frontMatter: T;
+        frontMatter: Record<string, any>;
         content: string;
     };
 };
 
-export type MarkdownParseResult<T> = {
-    successful: MarkdownFileResult<T>[];
+export type MarkdownParseResult = {
+    successful: MarkdownFileResult[];
     failed: Array<{
         filename: string;
         dirent: fs.Dirent;
@@ -99,18 +98,18 @@ export type MarkdownParseResult<T> = {
     }>;
 };
 
-export async function getMarkdownObjects<T extends Record<string, any>>(
+export async function getMarkdownObjects(
     folder: string
-): Promise<MarkdownParseResult<T>> {
+): Promise<MarkdownParseResult> {
     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
 
-    const successful: MarkdownFileResult<T>[] = [];
-    const failed: MarkdownParseResult<T>["failed"] = [];
+    const successful: MarkdownFileResult[] = [];
+    const failed: MarkdownParseResult["failed"] = [];
 
     await Promise.all(
         fileInfo.map(async (fi) => {
             const fullFilename = path.join(fi.parentPath, fi.name);
-            const result = await parseMarkdownFile<T>(fullFilename);
+            const result = await parseMarkdownFile(fullFilename);
 
             if (result.success) {
                 successful.push({
@@ -137,8 +136,8 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  * frontmatter against the provided schema. Logs validation errors to console and
  * optionally writes them to a text file for review.
  *
- * @template T - The expected type of the frontmatter object (must extend Record<string, any>)
- * @param {MarkdownFileResult<T>[]} objects - Array of parsed Markdown file results to validate
+ * @template T - The expected type of the validated frontmatter object (enforced by schema)
+ * @param {MarkdownFileResult[]} objects - Array of parsed Markdown file results to validate
  * @param {z.ZodSchema<T>} schema - Zod schema to validate frontmatter against
  * @returns {MarkdownObjectsValidState} Object containing validation statistics and error messages
  * ```
@@ -171,9 +170,8 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  * ```
  */
 export function validateMarkdownObjects<T extends Record<string, any>>(
-    objects: MarkdownFileResult<T>[],
+    objects: MarkdownFileResult[],
     schema: z.ZodSchema<T>
-    //    showErrors: boolean = true
 ): MarkdownObjectsValidState {
     const validationErrors: string[] = [];
     const now = new Date();
@@ -219,8 +217,11 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     };
 }
 
-export type ParseResult<T extends Record<string, any>> =
-    | { success: true; data: ParsedMarkdown<T> }
+export type ParseResult =
+    | {
+          success: true;
+          data: { frontMatter: Record<string, any>; content: string };
+      }
     | { success: false; error: string; filename: string };
 
 /**
@@ -229,12 +230,23 @@ export type ParseResult<T extends Record<string, any>> =
  * Extracts frontmatter delimited by `---` markers at the beginning of the file
  * and parses it as YAML. The remaining content is returned as plain text.
  *
+ * @param filename - Path to the markdown file to parse
+ * @returns A ParseResult with either success (containing frontmatter and content) or failure (containing error message)
+ *
+ * @example
+ * Parse a markdown file
+ * ```typescript
+ * const result = await parseMarkdownFile('article.md');
+ * if (result.success) {
+ *   console.log(result.data.frontMatter);
+ * } else {
+ *   console.error(result.error);
+ * }
+ * ```
  */
-export const parseMarkdownFile = async <
-    T extends Record<string, any> = Record<string, any>
->(
+export const parseMarkdownFile = async (
     filename: string
-): Promise<ParseResult<T>> => {
+): Promise<ParseResult> => {
     const allFileContents = await fsa.readFile(filename, "utf-8");
     const fileLines = allFileContents.split(/\r?\n/);
 
@@ -265,7 +277,7 @@ export const parseMarkdownFile = async <
         }
     }
 
-    let parsedFrontMatter: T = {} as T;
+    let parsedFrontMatter: Record<string, any> = {};
 
     const rawFrontMatter = frontMatterLines.join("\n").trim();
 
@@ -274,12 +286,12 @@ export const parseMarkdownFile = async <
             const parsed = yaml.load(rawFrontMatter);
             parsedFrontMatter =
                 parsed && typeof parsed === "object"
-                    ? (parsed as T)
-                    : ({} as T);
+                    ? (parsed as Record<string, any>)
+                    : {};
             return {
                 success: true,
                 data: {
-                    frontMatter: parsedFrontMatter as T,
+                    frontMatter: parsedFrontMatter,
                     content: contentLines.join("\n"),
                 },
             };
@@ -299,88 +311,25 @@ export const parseMarkdownFile = async <
     }
 };
 
-export const parseMarkdownFile2 = async <
-    T extends Record<string, any> = Record<string, any>
->(
-    filename: string
-): Promise<ParsedMarkdown<T>> => {
-    try {
-        const allFileContents = await fsa.readFile(filename, "utf-8");
-        const fileLines = allFileContents.split(/\r?\n/);
-
-        const frontMatterLines: string[] = [];
-        const contentLines: string[] = [];
-
-        let frontMatterDelimiterCount = 0;
-        let inFrontMatter = false;
-
-        for (const line of fileLines) {
-            if (line.trim() === "---") {
-                frontMatterDelimiterCount++;
-                if (frontMatterDelimiterCount === 1) {
-                    inFrontMatter = true;
-                } else if (frontMatterDelimiterCount === 2) {
-                    inFrontMatter = false;
-                }
-                continue;
-            }
-
-            if (inFrontMatter) {
-                frontMatterLines.push(line);
-            } else if (frontMatterDelimiterCount >= 2) {
-                contentLines.push(line);
-            } else if (frontMatterDelimiterCount === 0) {
-                // No frontMatter found, treat everything as content
-                contentLines.push(line);
-            }
-        }
-
-        // Parse frontMatter YAML
-        //let parsedFrontMatter: Record<string, any> = {};
-        // Parse frontMatter YAML
-        let parsedFrontMatter: T = {} as T;
-
-        const rawFrontMatter = frontMatterLines.join("\n").trim();
-
-        if (rawFrontMatter) {
-            try {
-                const parsed = yaml.load(rawFrontMatter);
-                parsedFrontMatter =
-                    parsed && typeof parsed === "object"
-                        ? (parsed as T)
-                        : ({} as T);
-            } catch (yamlError) {
-                console.warn(
-                    `Warning: Invalid YAML in frontMatter for ${filename}:`,
-                    yamlError
-                );
-                // Return empty object for frontMatter if YAML is invalid
-            }
-        }
-
-        return {
-            frontMatter: parsedFrontMatter as T,
-            content: contentLines.join("\n"),
-            //rawFrontMatter: rawFrontMatter || undefined,
-        };
-    } catch (error) {
-        throw new Error(`Failed to parse markdown file ${filename}: ${error}`);
-    }
-};
-
 /**
  * Converts a ParsedMarkdown object to markdown file content and writes it to a file
+ *
  * @param parsedMarkdown - The ParsedMarkdown object to convert
  * @param outputFilename - The filename to write the markdown content to
+ * @returns A promise that resolves when the file is written
+ *
+ * @example
+ * Write a markdown file
+ * ```typescript
+ * const parsed = {
+ *   frontMatter: { title: "My Article", date: "2025-12-03" },
+ *   content: "# Hello\n\nThis is content."
+ * };
+ * await writeMarkdownFile(parsed, "output.md");
+ * ```
  */
-// export const writeMarkdownFile = async (
-//   parsedMarkdown: ParsedMarkdown,
-//   outputFilename: string,
-// ): Promise<void> => {
-export const writeMarkdownFile = async <
-    T extends Record<string, any> = Record<string, any>
->(
-    parsedMarkdown: ParsedMarkdown<T>,
+export const writeMarkdownFile = async (
+    parsedMarkdown: ParsedMarkdown,
     outputFilename: string
 ): Promise<void> => {
     try {

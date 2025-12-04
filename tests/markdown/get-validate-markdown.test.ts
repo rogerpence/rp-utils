@@ -31,10 +31,9 @@ describe("converting markdown to objects", () => {
                 import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
-            const { successful, failed } =
-                await getMarkdownObjects<TechnicalNoteFrontmatter>(
-                    markdownDataPath
-                );
+            const { successful, failed } = await getMarkdownObjects(
+                markdownDataPath
+            );
 
             expect(successful.length).toBe(4);
         });
@@ -48,9 +47,7 @@ describe("converting markdown to objects", () => {
             );
 
             const { successful: markdownObjects, failed } =
-                await getMarkdownObjects<TechnicalNoteFrontmatter>(
-                    markdownDataPath
-                );
+                await getMarkdownObjects(markdownDataPath);
 
             expect(markdownObjects.length).toBe(4);
 
@@ -73,9 +70,7 @@ describe("converting markdown to objects", () => {
                 "tests\\test-data\\markdown\\one-bad"
             );
             const { successful: markdownObjects, failed } =
-                await getMarkdownObjects<TechnicalNoteFrontmatter>(
-                    markdownDataPath
-                );
+                await getMarkdownObjects(markdownDataPath);
 
             expect(markdownObjects.length).toBe(4);
 
@@ -84,9 +79,6 @@ describe("converting markdown to objects", () => {
                     markdownObjects,
                     TechnicalNoteFrontmatterSchema
                 );
-
-            // expect(markdownValidator.filesValid).toBe(3);
-            // expect(markdownValidator.filesFound).toBe(4);
 
             expect(markdownValidator.filesValid).toBeLessThan(
                 markdownValidator.filesFound
@@ -111,17 +103,20 @@ describe("converting markdown to objects", () => {
             );
 
             const { successful: markdownObjects, failed } =
-                await getMarkdownObjects<TechnicalNoteFrontmatter>(
-                    markdownDataPath
-                );
+                await getMarkdownObjects(markdownDataPath);
 
             expect(markdownObjects.length).toBe(1);
 
-            const markdownValidator =
-                validateMarkdownObjects<TechnicalNoteFrontmatter>(
-                    markdownObjects,
-                    TechnicalNoteFrontmatterSchema
-                );
+            const markdownValidator = validateMarkdownObjects(
+                markdownObjects,
+                TechnicalNoteFrontmatterSchema
+            );
+
+            // const markdownValidator =
+            //     validateMarkdownObjects<TechnicalNoteFrontmatter>(
+            //         markdownObjects,
+            //         TechnicalNoteFrontmatterSchema
+            //     );
 
             expect(markdownValidator.filesFound).toBeGreaterThan(
                 markdownValidator.filesValid
