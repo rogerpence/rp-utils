@@ -1,103 +1,68 @@
 import * as yaml from "js-yaml";
-
 import fs, { promises as fsa } from "fs";
+import path from "path";
+import { z } from "zod";
+
 import {
     deleteFile,
     getAppPath,
     getAllDirEntries,
     writeTextFile,
 } from "./filesystem";
+
 import { convertDateToStringYYYY_MM_DD } from "./date";
-import { fileURLToPath } from "url";
 
-import { z } from "zod";
-import path from "path";
-import { error } from "console";
+// ============================================================================
+// Type Definitions
+// ============================================================================
 
+/**
+ * Represents a parsed markdown file with frontmatter and content.
+ *
+ * @template T - The type of the frontmatter object (defaults to Record<string, any>)
+ */
 export interface ParsedMarkdown<
     T extends Record<string, any> = Record<string, any>
 > {
+    /** The parsed YAML frontmatter as an object */
     frontMatter: T;
+    /** The markdown content (everything after the frontmatter) */
     content: string;
 }
 
-export type MarkdownObjectsCollection = {
-    filesFound: number;
-    filesValid: number;
-    collection: MarkdownFileResult[];
-};
-
-export type ValidatedMarkdownFileResult<T extends Record<string, any>> = {
-    dirent: fs.Dirent;
-    markdownObject: {
-        frontMatter: T;
-        content: string;
-    };
-};
-
-export type MarkdownObjectsValidState<T extends Record<string, any>> = {
-    filesFound: number;
-    filesValid: number;
-    validationErrors: string[];
-    validatedObjects: ValidatedMarkdownFileResult<T>[];
-};
+/**
+ * Result of parsing a single markdown file.
+ * Contains either success with parsed data or failure with error information.
+ */
+export type ParseResult =
+    | {
+          success: true;
+          data: { frontMatter: Record<string, any>; content: string };
+      }
+    | { success: false; error: string; filename: string };
 
 /**
- * Retrieves and parses all Markdown files from a specified directory.
- *
- * Reads all `.md` files in the given folder, parses their frontmatter and content,
- * and returns an array of objects containing both the file system information (Dirent)
- * and the parsed Markdown data.
- *
- * @param {string} folder - Path to the directory containing Markdown files (can be relative or absolute)
- * @returns {Promise<MarkdownParseResult>} Object containing successful and failed parse results
- *
- * @example
- * Retrieve all markdown files from a folder
- * const { successful, failed } = await getMarkdownObjects('../markdown');
- * console.log(`Found ${successful.length} valid files, ${failed.length} failed`);
- *
- * @example
- * Access individual file information
- * const { successful } = await getMarkdownObjects('../markdown');
- * successful.forEach(note => {
- *   console.log(`File: ${note.dirent.name}`);
- *   console.log(`Title: ${note.markdownObject.frontMatter.title}`);
- * });
+ * Represents a markdown file with its file system information and parsed content.
+ * The frontmatter is untyped (Record<string, any>) until validated.
  */
-// export async function getMarkdownObjects2<T extends Record<string, any>>(
-//     folder: string
-// ): Promise<MarkdownFileResult<T>[]> {
-//     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
-
-//     const collectionResults = await Promise.all(
-//         fileInfo.map(async (fi) => {
-//             const fullFilename = path.join(fi.parentPath, fi.name);
-
-//             const markdownObject = await parseMarkdownFile<T>(fullFilename);
-
-//             return {
-//                 dirent: fi,
-//                 markdownObject,
-//             };
-//         })
-//     );
-
-//     // console.jsonString(collectionResults);
-
-//     return collectionResults;
-// }
-
 export type MarkdownFileResult = {
+    /** File system directory entry information */
     dirent: fs.Dirent;
+    /** Parsed markdown content with untyped frontmatter */
     markdownObject: {
         frontMatter: Record<string, any>;
         content: string;
     };
 };
 
+/**
+ * Result of parsing multiple markdown files from a directory.
+ * Separates successfully parsed files from failed ones.
+ */
 export type MarkdownParseResult = {
+    /** Array of successfully parsed markdown files */
     successful: MarkdownFileResult[];
+    /** Array of files that failed to parse with error information */
     failed: Array<{
         filename: string;
         dirent: fs.Dirent;
@@ -105,6 +70,80 @@ export type MarkdownParseResult = {
     }>;
 };
 
+/**
+ * Represents a validated markdown file with strongly-typed frontmatter.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type ValidatedMarkdownFileResult<T extends Record<string, any>> = {
+    /** File system directory entry information */
+    dirent: fs.Dirent;
+    /** Parsed markdown content with typed frontmatter */
+    markdownObject: {
+        /** Frontmatter validated and typed as T */
+        frontMatter: T;
+        /** The markdown content */
+        content: string;
+    };
+};
+
+/**
+ * Result of validating markdown files against a Zod schema.
+ * Contains validation statistics, errors, and successfully validated objects.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type MarkdownObjectsValidState<T extends Record<string, any>> = {
+    /** Total number of files found */
+    filesFound: number;
+    /** Number of files that passed validation */
+    filesValid: number;
+    /** Array of validation error messages */
+    validationErrors: string[];
+    /** Array of successfully validated markdown files with typed frontmatter */
+    validatedObjects: ValidatedMarkdownFileResult<T>[];
+};
+
+// /**
+//  * Collection of markdown files with validation statistics.
+//  * @deprecated Use MarkdownParseResult and MarkdownObjectsValidState instead
+//  */
+// export type MarkdownObjectsCollection = {
+//     filesFound: number;
+//     filesValid: number;
+//     collection: MarkdownFileResult[];
+// };
+
+// ============================================================================
+// Functions
+// ============================================================================
+
+/**
+ * Retrieves and parses all markdown files from a specified directory.
+ *
+ * Reads all `.md` files in the given folder, parses their frontmatter and content,
+ * and separates successfully parsed files from failed ones. The frontmatter in
+ * successful files is untyped (Record<string, any>) until validated with a schema.
+ *
+ * @param folder - Path to the directory containing markdown files
+ * @returns Promise resolving to an object with successful and failed parse results
+ *
+ * @example
+ * Parse all markdown files in a directory
+ * ```typescript
+ * const { successful, failed } = await getMarkdownObjects('./posts');
+ * console.log(`Parsed ${successful.length} files, ${failed.length} failed`);
+ *
+ * successful.forEach(file => {
+ *   console.log(`File: ${file.dirent.name}`);
+ *   console.log(`Frontmatter:`, file.markdownObject.frontMatter);
+ * });
+ *
+ * if (failed.length > 0) {
+ *   failed.forEach(f => console.error(`${f.filename}: ${f.error}`));
+ * }
+ * ```
+ */
 export async function getMarkdownObjects(
     folder: string
 ): Promise<MarkdownParseResult> {
@@ -137,42 +176,44 @@ export async function getMarkdownObjects(
 }
 
 /**
- * Validates the frontmatter of parsed Markdown objects against a Zod schema.
+ * Validates markdown frontmatter against a Zod schema and returns typed results.
  *
- * Iterates through a collection of Markdown file results and validates each file's
- * frontmatter against the provided schema. Logs validation errors to console and
- * optionally writes them to a text file for review.
+ * Takes untyped parsed markdown files and validates their frontmatter against the provided
+ * Zod schema. Successfully validated files are returned with properly typed frontmatter,
+ * while validation errors are collected for review.
  *
- * @template T - The expected type of the validated frontmatter object (enforced by schema)
- * @param {MarkdownFileResult[]} objects - Array of parsed Markdown file results to validate
- * @param {z.ZodSchema<T>} schema - Zod schema to validate frontmatter against
- * @returns {MarkdownObjectsValidState} Object containing validation statistics and error messages
- * ```
- * type MarkdownObjectsValidtState = {
- *       filesFound: number;
- *        filesValid: number;
- *        validationErrors: string[];
- * }
- * ```
-};
- * 
+ * @template T - The validated type of the frontmatter (inferred from schema)
+ * @param objects - Array of parsed markdown files with untyped frontmatter
+ * @param schema - Zod schema defining the expected frontmatter structure
+ * @returns Object containing statistics, errors, and validated files with typed frontmatter
+ *
  * @example
- * Validate markdown objects and check results
- * ```
- * const markdownObjects = await getMarkdownObjects<TechnicalNoteFrontmatter>('../markdown');
- * const validation = validateMarkdownObjects(markdownObjects, TechnicalNoteFrontmatterSchema);
- * if (validation.filesFound === validation.filesValid) {
+ * Validate and use typed frontmatter
+ * ```typescript
+ * const { successful } = await getMarkdownObjects('./posts');
+ * const validation = validateMarkdownObjects(successful, TechnicalNoteFrontmatterSchema);
+ *
+ * if (validation.filesValid === validation.filesFound) {
  *   console.log('All files valid!');
+ *   // validatedObjects have typed frontmatter
+ *   validation.validatedObjects.forEach(obj => {
+ *     console.log(obj.markdownObject.frontMatter.title); // Type-safe!
+ *   });
  * } else {
- *   console.log(`${validation.filesValid}/${validation.filesFound} files are valid`);
+ *   console.log(`${validation.filesValid}/${validation.filesFound} valid`);
+ *   console.error(validation.validationErrors.join('\n'));
  * }
  * ```
+ *
  * @example
- * Handle validation errors
- * ```
- * const validation = validateMarkdownObjects(objects, schema);
+ * Write validation errors to file
+ * ```ts
+ * const validation = validateMarkdownObjects(files, schema);
  * if (validation.validationErrors.length > 0) {
- *   console.error('Validation failed. Check error file for details.');
+ *   await writeTextFile(
+ *     validation.validationErrors.join('\n'),
+ *     'validation-errors.txt'
+ *   );
  * }
  * ```
  */
@@ -233,30 +274,36 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     };
 }
 
-export type ParseResult =
-    | {
-          success: true;
-          data: { frontMatter: Record<string, any>; content: string };
-      }
-    | { success: false; error: string; filename: string };
-
 /**
- * Parses a markdown file with optional YAML frontmatter
+ * Parses a markdown file with YAML frontmatter.
  *
  * Extracts frontmatter delimited by `---` markers at the beginning of the file
  * and parses it as YAML. The remaining content is returned as plain text.
+ * Returns a Result type with either success (parsed data) or failure (error details).
  *
- * @param filename - Path to the markdown file to parse
- * @returns A ParseResult with either success (containing frontmatter and content) or failure (containing error message)
+ * @param filename - Absolute or relative path to the markdown file
+ * @returns Promise resolving to ParseResult with success/failure information
  *
  * @example
  * Parse a markdown file
  * ```typescript
- * const result = await parseMarkdownFile('article.md');
+ * const result = await parseMarkdownFile('./posts/article.md');
+ *
  * if (result.success) {
- *   console.log(result.data.frontMatter);
+ *   console.log('Title:', result.data.frontMatter.title);
+ *   console.log('Content length:', result.data.content.length);
  * } else {
- *   console.error(result.error);
+ *   console.error(`Parse failed: ${result.filename}`);
+ *   console.error(`Error: ${result.error}`);
+ * }
+ * ```
+ *
+ * @example
+ * Handle parsing errors
+ * ```typescript
+ * const result = await parseMarkdownFile('invalid.md');
+ * if (!result.success) {
+ *   console.error(`Failed to parse ${result.filename}: ${result.error}`);
  * }
  * ```
  */
@@ -328,20 +375,49 @@ export const parseMarkdownFile = async (
 };
 
 /**
- * Converts a ParsedMarkdown object to markdown file content and writes it to a file
+ * Writes a ParsedMarkdown object to a file with YAML frontmatter.
  *
- * @param parsedMarkdown - The ParsedMarkdown object to convert
- * @param outputFilename - The filename to write the markdown content to
- * @returns A promise that resolves when the file is written
+ * Serializes the frontmatter object to YAML format, wraps it in `---` delimiters,
+ * and combines it with the markdown content before writing to the specified file.
+ * If frontmatter is empty, only content is written.
+ *
+ * @param parsedMarkdown - Object containing frontmatter and content to write
+ * @param outputFilename - Path where the markdown file should be written
+ * @returns Promise that resolves when file is successfully written
+ * @throws Error if file write fails
  *
  * @example
- * Write a markdown file
- * ```typescript
- * const parsed = {
- *   frontMatter: { title: "My Article", date: "2025-12-03" },
- *   content: "# Hello\n\nThis is content."
+ * Write markdown with frontmatter
+ * ```ts
+ * const document = {
+ *   frontMatter: {
+ *     title: "My Article",
+ *     date: "2025-12-03",
+ *     tags: ["typescript", "markdown"]
+ *   },
+ *   content: "# Hello World\n\nThis is my content."
  * };
- * await writeMarkdownFile(parsed, "output.md");
+ *
+ * await writeMarkdownFile(document, "./output/article.md");
+ *
+ * Creates this file:
+ * ---
+ * title: My Article
+ * date: '2025-12-03'
+ * tags:
+ *   - typescript
+ *   - markdown
+ * ---
+ * # Hello World
+ * This is my content.
+ * ```
+ * @example
+ * Write content-only markdown
+ * ```ts
+ * await writeMarkdownFile(
+ *   { frontMatter: {}, content: "# Just content" },
+ *   "simple.md"
+ * );
  * ```
  */
 export const writeMarkdownFile = async (

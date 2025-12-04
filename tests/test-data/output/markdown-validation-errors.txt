@@ -1,4 +1,4 @@
-Frontmatter Validation Errors  2025-12-04 9:24:18 PM
+Frontmatter Validation Errors  2025-12-04 10:09:48 PM
 
 Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\one-bad\add-a-marddown-frontmatter-property-with-vs-code.md
     Error: pinned: Invalid input: expected boolean, received undefined
