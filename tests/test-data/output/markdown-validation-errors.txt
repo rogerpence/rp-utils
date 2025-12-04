@@ -1,3 +1,8 @@
-2025-12-03 1:05:35 PM
-add-postcss-to-sveltekit-project.md\add-postcss-to-sveltekit-project.md  - date_created: Invalid input: expected string, received undefined
-add-postcss-to-sveltekit-project.md\add-postcss-to-sveltekit-project.md  - : Unrecognized key: "date_createdd"
+Frontmatter Validation Errors  2025-12-04 8:20:56 PM
+
+Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\one-bad\add-a-marddown-frontmatter-property-with-vs-code.md
+    Error: pinned: Invalid input: expected boolean, received undefined
+
+Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\one-bad\add-postcss-to-sveltekit-project.md
+    Error: date_created: Invalid input: expected string, received undefined
+    Error: : Unrecognized key: "date_createdd"

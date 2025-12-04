@@ -4,7 +4,6 @@ description: Add a marddown frontmatter property with VS Code
 date_created: '2025-05-18'
 date_updated: '2025-11-03'
 date_published: null
-pinned: false
 tags:
   - vs-code
   - frontmatter

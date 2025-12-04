@@ -23,21 +23,13 @@ export interface ParsedMarkdown<
 
 // rawFrontMatter?: string;
 
-export type MarkdownFileResult<T> = {
-    dirent: fs.Dirent;
-    markdownObject: {
-        frontMatter: T;
-        content: string;
-    };
-};
-
 export type MarkdownObjectsCollection<T> = {
     filesFound: number;
     filesValid: number;
     collection: MarkdownFileResult<T>[];
 };
 
-export type MarkdownObjectsValidtState = {
+export type MarkdownObjectsValidState = {
     filesFound: number;
     filesValid: number;
     validationErrors: string[];
@@ -67,27 +59,75 @@ export type MarkdownObjectsValidtState = {
  *   console.log(`Title: ${note.markdownObject.frontMatter.title}`);
  * });
  */
+// export async function getMarkdownObjects2<T extends Record<string, any>>(
+//     folder: string
+// ): Promise<MarkdownFileResult<T>[]> {
+//     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
+
+//     const collectionResults = await Promise.all(
+//         fileInfo.map(async (fi) => {
+//             const fullFilename = path.join(fi.parentPath, fi.name);
+
+//             const markdownObject = await parseMarkdownFile<T>(fullFilename);
+
+//             return {
+//                 dirent: fi,
+//                 markdownObject,
+//             };
+//         })
+//     );
+
+//     // console.jsonString(collectionResults);
+
+//     return collectionResults;
+// }
+
+export type MarkdownFileResult<T> = {
+    dirent: fs.Dirent;
+    markdownObject: {
+        frontMatter: T;
+        content: string;
+    };
+};
+
+export type MarkdownParseResult<T> = {
+    successful: MarkdownFileResult<T>[];
+    failed: Array<{
+        filename: string;
+        dirent: fs.Dirent;
+        error: string;
+    }>;
+};
+
 export async function getMarkdownObjects<T extends Record<string, any>>(
     folder: string
-): Promise<MarkdownFileResult<T>[]> {
+): Promise<MarkdownParseResult<T>> {
     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
 
-    const collectionResults = await Promise.all(
+    const successful: MarkdownFileResult<T>[] = [];
+    const failed: MarkdownParseResult<T>["failed"] = [];
+
+    await Promise.all(
         fileInfo.map(async (fi) => {
             const fullFilename = path.join(fi.parentPath, fi.name);
+            const result = await parseMarkdownFile<T>(fullFilename);
 
-            const markdownObject = await parseMarkdownFile<T>(fullFilename);
-
-            return {
-                dirent: fi,
-                markdownObject,
-            };
+            if (result.success) {
+                successful.push({
+                    dirent: fi,
+                    markdownObject: result.data,
+                });
+            } else {
+                failed.push({
+                    filename: fullFilename,
+                    dirent: fi,
+                    error: result.error,
+                });
+            }
         })
     );
 
-    // console.jsonString(collectionResults);
-
-    return collectionResults;
+    return { successful, failed };
 }
 
 /**
@@ -100,7 +140,7 @@ export async function getMarkdownObjects<T extends Record<string, any>>(
  * @template T - The expected type of the frontmatter object (must extend Record<string, any>)
  * @param {MarkdownFileResult<T>[]} objects - Array of parsed Markdown file results to validate
  * @param {z.ZodSchema<T>} schema - Zod schema to validate frontmatter against
- * @returns {MarkdownObjectsValidtState} Object containing validation statistics and error messages
+ * @returns {MarkdownObjectsValidState} Object containing validation statistics and error messages
  * ```
  * type MarkdownObjectsValidtState = {
  *       filesFound: number;
@@ -134,7 +174,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     objects: MarkdownFileResult<T>[],
     schema: z.ZodSchema<T>
     //    showErrors: boolean = true
-): MarkdownObjectsValidtState {
+): MarkdownObjectsValidState {
     const validationErrors: string[] = [];
     const now = new Date();
 
@@ -143,19 +183,20 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
 
     objects.map(async (obj) => {
         const result = schema.safeParse(obj.markdownObject.frontMatter);
+        let previousFilename = "";
 
         if (!result.success) {
-            const fullFilename = path.join(obj.dirent.name, obj.dirent.name);
-            // if (showErrors) {
-            //     console.error(`\n❌ Validation failure: ${obj.dirent.name}`);
-            //     console.error(`File:${fullFilename}`);
-            //     console.error("Errors:");
-            // }
+            const fullFilename = path.join(
+                obj.dirent.parentPath,
+                obj.dirent.name
+            );
             result.error.issues.forEach((issue) => {
+                if (fullFilename != previousFilename) {
+                    validationErrors.push(`\nFilename: ${fullFilename}`);
+                    previousFilename = fullFilename;
+                }
                 validationErrors.push(
-                    `${fullFilename}  - ${issue.path.join(".")}: ${
-                        issue.message
-                    }`
+                    `    Error: ${issue.path.join(".")}: ${issue.message}`
                 );
             });
         } else {
@@ -165,7 +206,9 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
 
     if (validationErrors.length > 1) {
         validationErrors.unshift(
-            `${convertDateToStringYYYY_MM_DD(now)} ${now.toLocaleTimeString()}`
+            `Frontmatter Validation Errors  ${convertDateToStringYYYY_MM_DD(
+                now
+            )} ${now.toLocaleTimeString()}`
         );
     }
 
@@ -176,98 +219,9 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     };
 }
 
-// /**
-//  *
-//  * @param folder - top-level markdown folder
-//  * @param schema - Zod markdown schema
-//  * @return {Promise<MarkdownObjectsCollection<T>>} A promise resolving to an object with:
-//  *   - filesFound: Total number of markdown files found
-//  *   - filesValid: Number of files that passed schema validation
-//  *   - collection: Array of validated markdown file results with dirent and parsed content
-//  * @example
-//  * ```
-//  * import * as z from 'zod';
-//  *
-//  * export const TechnicalNoteFrontmatterSchema = z
-//  *	.object({
-//  *		title: z.string(),
-//  *		description: z.string(),
-//  *		date_created: z.string(),
-//  *		date_updated: z.string(),
-//  *		date_published: z.string().nullable().optional(),
-//  *		pinned: z.boolean(),
-//  *		tags: z.array(z.string())
-//  *	})
-//  *	.strict();
-//  *
-//  * export type TechnicalNoteFrontmatter = z.infer<typeof TechnicalNoteFrontmatterSchema>;
-//  *
-//  * const markdownObjects = await getMarkdownCollection<TechnicalNoteFrontmatter>(
-//  *	  markdownDirectory,
-//  *	  TechnicalNoteFrontmatterSchema
-//  * );
-//  *```
-//  */
-// export async function getMarkdownCollection<T extends Record<string, any>>(
-//     folder: string,
-//     schema: z.ZodSchema<T>
-// ): Promise<MarkdownObjectsCollection<T>> {
-//     const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
-
-//     const validationErrors: string[] = [];
-//     const now = new Date();
-//     validationErrors.push(
-//         `${formatDateToYYYYMMDD(now)} ${now.toLocaleTimeString()}`
-//     );
-
-//     const filesFound = fileInfo.length;
-//     let filesValid = 0;
-
-//     const collectionResults = await Promise.all(
-//         fileInfo.map(async (fi) => {
-//             const fullFilename = path.join(fi.parentPath, fi.name);
-
-//             const markdownObject = await parseMarkdownFile<T>(fullFilename);
-
-//             const result = schema.safeParse(markdownObject.frontMatter);
-
-//             if (!result.success) {
-//                 console.error(`\n❌ Validation failure: ${fi.name}`);
-//                 console.error(`File: ${fullFilename}`);
-//                 console.error("Errors:");
-//                 result.error.issues.forEach((issue) => {
-//                     console.warn(
-//                         `  - ${issue.path.join(".")}: ${issue.message}`
-//                     );
-//                     validationErrors.push(
-//                         `${fullFilename}  - ${issue.path.join(".")}: ${
-//                             issue.message
-//                         }`
-//                     );
-//                 });
-//             } else {
-//                 filesValid++;
-//                 // console.success('success');
-//             }
-//             return {
-//                 dirent: fi,
-//                 markdownObject,
-//             };
-//         })
-//     );
-
-//     if (validationErrors.length > 0) {
-//         const errorFilePath = getPathForCli("markdown-validation-errors.txt");
-//         writeTextFile(validationErrors.join("\n"), errorFilePath);
-//         console.error(`See validate error file: ${errorFilePath}`);
-//     }
-
-//     return {
-//         filesFound,
-//         filesValid,
-//         collection: collectionResults,
-//     };
-// }
+export type ParseResult<T extends Record<string, any>> =
+    | { success: true; data: ParsedMarkdown<T> }
+    | { success: false; error: string; filename: string };
 
 /**
  * Parses a markdown file with optional YAML frontmatter
@@ -275,15 +229,77 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
  * Extracts frontmatter delimited by `---` markers at the beginning of the file
  * and parses it as YAML. The remaining content is returned as plain text.
  *
- * @param filename - The path to the markdown file to parse
- * @returns A promise that resolves to a ParsedMarkdown object containing the parsed frontmatter and content
- * @throws {Error} If the file cannot be read or parsing fails
  */
-// export const parseMarkdownFile = async (
-//   filename: string,
-// ): Promise<ParsedMarkdown> => {
-
 export const parseMarkdownFile = async <
+    T extends Record<string, any> = Record<string, any>
+>(
+    filename: string
+): Promise<ParseResult<T>> => {
+    const allFileContents = await fsa.readFile(filename, "utf-8");
+    const fileLines = allFileContents.split(/\r?\n/);
+
+    const frontMatterLines: string[] = [];
+    const contentLines: string[] = [];
+
+    let frontMatterDelimiterCount = 0;
+    let inFrontMatter = false;
+
+    for (const line of fileLines) {
+        if (line.trim() === "---") {
+            frontMatterDelimiterCount++;
+            if (frontMatterDelimiterCount === 1) {
+                inFrontMatter = true;
+            } else if (frontMatterDelimiterCount === 2) {
+                inFrontMatter = false;
+            }
+            continue;
+        }
+
+        if (inFrontMatter) {
+            frontMatterLines.push(line);
+        } else if (frontMatterDelimiterCount >= 2) {
+            contentLines.push(line);
+        } else if (frontMatterDelimiterCount === 0) {
+            // No frontMatter found, treat everything as content
+            contentLines.push(line);
+        }
+    }
+
+    let parsedFrontMatter: T = {} as T;
+
+    const rawFrontMatter = frontMatterLines.join("\n").trim();
+
+    if (rawFrontMatter) {
+        try {
+            const parsed = yaml.load(rawFrontMatter);
+            parsedFrontMatter =
+                parsed && typeof parsed === "object"
+                    ? (parsed as T)
+                    : ({} as T);
+            return {
+                success: true,
+                data: {
+                    frontMatter: parsedFrontMatter as T,
+                    content: contentLines.join("\n"),
+                },
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : String(error),
+                filename,
+            };
+        }
+    } else {
+        return {
+            success: false,
+            error: "Failed to parse frontmatter",
+            filename,
+        };
+    }
+};
+
+export const parseMarkdownFile2 = async <
     T extends Record<string, any> = Record<string, any>
 >(
     filename: string

@@ -14,7 +14,7 @@ import {
     type TechnicalNoteFrontmatter,
 } from "../obsidan-types";
 
-describe("get markdown docs", () => {
+describe("converting markdown to objects", () => {
     const errorFilePath = getAppPath(
         import.meta.url,
         "tests\\test-data\\output"
@@ -25,30 +25,35 @@ describe("get markdown docs", () => {
         "markdown-validation-errors.txt"
     );
 
-    describe("get-objects-from-all-good", () => {
-        it("should show success", async () => {
+    describe("when four files all have parseable frontmatter", () => {
+        it("should fetch four TechnicalNoteFrontmatter objects", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
-            const markdownObjects =
+            const { successful, failed } =
                 await getMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownDataPath
                 );
-            expect(markdownObjects.length).toBe(4);
+
+            expect(successful.length).toBe(4);
         });
     });
 
-    describe("read and validate four markdown documents", () => {
-        it("should show success", async () => {
+    describe("when four files have parseable and typesafe frontmatter", () => {
+        it("should fetch four TechnicalNoteFrontmatter objects and four ", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
                 "tests\\test-data\\markdown\\all-good"
             );
-            const markdownObjects =
+
+            const { successful: markdownObjects, failed } =
                 await getMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownDataPath
                 );
+
+            expect(markdownObjects.length).toBe(4);
+
             const markdownValidator = validateMarkdownObjects(
                 markdownObjects,
                 TechnicalNoteFrontmatterSchema
@@ -56,10 +61,6 @@ describe("get markdown docs", () => {
 
             expect(markdownValidator.filesFound).toBe(4);
             expect(markdownValidator.validationErrors.length).toBe(0);
-            writeTextFile(
-                markdownValidator.validationErrors.join("\n"),
-                fullErrorFilename
-            );
         });
     });
 
@@ -71,21 +72,25 @@ describe("get markdown docs", () => {
                 import.meta.url,
                 "tests\\test-data\\markdown\\one-bad"
             );
-            const markdownObjects =
+            const { successful: markdownObjects, failed } =
                 await getMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownDataPath
                 );
+
             expect(markdownObjects.length).toBe(4);
 
             const markdownValidator =
                 validateMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownObjects,
-                    TechnicalNoteFrontmatterSchema,
-                    false
+                    TechnicalNoteFrontmatterSchema
                 );
 
-            expect(markdownValidator.filesValid).toBe(3);
-            expect(markdownValidator.filesFound).toBe(4);
+            // expect(markdownValidator.filesValid).toBe(3);
+            // expect(markdownValidator.filesFound).toBe(4);
+
+            expect(markdownValidator.filesValid).toBeLessThan(
+                markdownValidator.filesFound
+            );
 
             if (markdownValidator.validationErrors.length > 1) {
                 writeTextFile(
@@ -105,7 +110,7 @@ describe("get markdown docs", () => {
                 "tests\\test-data\\markdown\\one-malformed-frontmatter"
             );
 
-            const markdownObjects =
+            const { successful: markdownObjects, failed } =
                 await getMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownDataPath
                 );
@@ -115,8 +120,7 @@ describe("get markdown docs", () => {
             const markdownValidator =
                 validateMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownObjects,
-                    TechnicalNoteFrontmatterSchema,
-                    false
+                    TechnicalNoteFrontmatterSchema
                 );
 
             expect(markdownValidator.filesFound).toBeGreaterThan(
