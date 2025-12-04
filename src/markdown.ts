@@ -29,10 +29,19 @@ export type MarkdownObjectsCollection = {
     collection: MarkdownFileResult[];
 };
 
-export type MarkdownObjectsValidState = {
+export type ValidatedMarkdownFileResult<T extends Record<string, any>> = {
+    dirent: fs.Dirent;
+    markdownObject: {
+        frontMatter: T;
+        content: string;
+    };
+};
+
+export type MarkdownObjectsValidState<T extends Record<string, any>> = {
     filesFound: number;
     filesValid: number;
     validationErrors: string[];
+    validatedObjects: ValidatedMarkdownFileResult<T>[];
 };
 
 /**
@@ -172,16 +181,17 @@ export async function getMarkdownObjects(
 export function validateMarkdownObjects<T extends Record<string, any>>(
     objects: MarkdownFileResult[],
     schema: z.ZodSchema<T>
-): MarkdownObjectsValidState {
+): MarkdownObjectsValidState<T> {
     const validationErrors: string[] = [];
+    const validatedObjects: ValidatedMarkdownFileResult<T>[] = [];
     const now = new Date();
 
     let filesFound = objects.length;
     let filesValid = 0;
+    let previousFilename = "";
 
-    objects.map(async (obj) => {
+    objects.forEach((obj) => {
         const result = schema.safeParse(obj.markdownObject.frontMatter);
-        let previousFilename = "";
 
         if (!result.success) {
             const fullFilename = path.join(
@@ -189,7 +199,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
                 obj.dirent.name
             );
             result.error.issues.forEach((issue) => {
-                if (fullFilename != previousFilename) {
+                if (fullFilename !== previousFilename) {
                     validationErrors.push(`\nFilename: ${fullFilename}`);
                     previousFilename = fullFilename;
                 }
@@ -199,10 +209,17 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
             });
         } else {
             filesValid++;
+            validatedObjects.push({
+                dirent: obj.dirent,
+                markdownObject: {
+                    frontMatter: result.data, // Now properly typed as T!
+                    content: obj.markdownObject.content,
+                },
+            });
         }
     });
 
-    if (validationErrors.length > 1) {
+    if (validationErrors.length > 0) {
         validationErrors.unshift(
             `Frontmatter Validation Errors  ${convertDateToStringYYYY_MM_DD(
                 now
@@ -214,6 +231,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
         filesFound,
         filesValid,
         validationErrors,
+        validatedObjects,
     };
 }
 
