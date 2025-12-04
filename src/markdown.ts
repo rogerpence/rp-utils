@@ -21,8 +21,6 @@ export interface ParsedMarkdown<
     content: string;
 }
 
-// rawFrontMatter?: string;
-
 export type MarkdownObjectsCollection = {
     filesFound: number;
     filesValid: number;
