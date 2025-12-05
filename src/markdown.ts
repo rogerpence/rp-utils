@@ -1,5 +1,5 @@
 import * as yaml from "js-yaml";
-import fs, { promises as fsa } from "fs";
+import { promises as fsa } from "fs";
 import path from "path";
 import { z } from "zod";
 
@@ -15,6 +15,35 @@ import { convertDateToStringYYYY_MM_DD } from "./date";
 // ============================================================================
 // Type Definitions
 // ============================================================================
+
+/**
+ * A proxy for the fs.Dirent object. SvelteKit does not allow referencing the FS module in client-side code.
+ */
+export type DirentInfo = {
+    name: string;
+    path: string;
+    parentPath: string;
+};
+
+/**
+ * Represents a validated markdown file with strongly-typed frontmatter.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type MarkdownObject<T extends Record<string, any>> = {
+    content: string;
+    frontMatter: T;
+};
+
+/**
+ * Represents a markdown object with direent meta info.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type MarkdownDocument<T extends Record<string, any>> = {
+    dirent: DirentInfo;
+    markdownObject: MarkdownObject<T>;
+};
 
 /**
  * Represents a parsed markdown file with frontmatter and content.
@@ -47,7 +76,7 @@ export type ParseResult =
  */
 export type MarkdownFileResult = {
     /** File system directory entry information */
-    dirent: fs.Dirent;
+    dirent: DirentInfo;
     /** Parsed markdown content with untyped frontmatter */
     markdownObject: {
         frontMatter: Record<string, any>;
@@ -65,26 +94,9 @@ export type MarkdownParseResult = {
     /** Array of files that failed to parse with error information */
     failed: Array<{
         filename: string;
-        dirent: fs.Dirent;
+        dirent: DirentInfo;
         error: string;
     }>;
-};
-
-/**
- * Represents a validated markdown file with strongly-typed frontmatter.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type ValidatedMarkdownFileResult<T extends Record<string, any>> = {
-    /** File system directory entry information */
-    dirent: fs.Dirent;
-    /** Parsed markdown content with typed frontmatter */
-    markdownObject: {
-        /** Frontmatter validated and typed as T */
-        frontMatter: T;
-        /** The markdown content */
-        content: string;
-    };
 };
 
 /**
@@ -101,7 +113,7 @@ export type MarkdownObjectsValidState<T extends Record<string, any>> = {
     /** Array of validation error messages */
     validationErrors: string[];
     /** Array of successfully validated markdown files with typed frontmatter */
-    validatedObjects: ValidatedMarkdownFileResult<T>[];
+    validatedObjects: MarkdownDocument<T>[];
 };
 
 // /**
@@ -147,7 +159,7 @@ export type MarkdownObjectsValidState<T extends Record<string, any>> = {
 export async function getMarkdownObjects(
     folder: string
 ): Promise<MarkdownParseResult> {
-    const fileInfo: fs.Dirent[] = getAllDirEntries(folder) ?? [];
+    const fileInfo: DirentInfo[] = getAllDirEntries(folder) ?? [];
 
     const successful: MarkdownFileResult[] = [];
     const failed: MarkdownParseResult["failed"] = [];
@@ -222,7 +234,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     schema: z.ZodSchema<T>
 ): MarkdownObjectsValidState<T> {
     const validationErrors: string[] = [];
-    const validatedObjects: ValidatedMarkdownFileResult<T>[] = [];
+    const validatedObjects: MarkdownDocument<T>[] = [];
     const now = new Date();
 
     let filesFound = objects.length;

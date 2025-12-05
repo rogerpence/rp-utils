@@ -4,7 +4,7 @@ description: How to add PostCSS to a Sveltekit project
 date_created: 2025-05-18
 date_updated: 2025-11-03
 date_published: null
-pinned: 
+pinned: false
 tags:
   - sveltekit
   - asna-com

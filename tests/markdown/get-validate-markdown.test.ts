@@ -70,6 +70,13 @@ describe("converting markdown to objects", () => {
 
             expect(markdownValidator.filesFound).toBe(4);
             expect(markdownValidator.validationErrors.length).toBe(0);
+
+            console.jsonString(markdownValidator.validationErrors);
+
+            writeTextFile(
+                markdownValidator.validationErrors.join("\n"),
+                fullErrorFilename
+            );
         });
     });
 

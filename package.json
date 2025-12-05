@@ -1,6 +1,6 @@
 {
     "name": "@rogerpence/rp-utils",
-    "version": "1.0.36",
+    "version": "1.0.37",
     "type": "module",
     "main": "./src/index.js",
     "exports": {
@@ -16,6 +16,7 @@
     "scripts": {
         "build-docs": "typedoc --out ./docs --darkHighlightTheme github-dark",
         "run-tests": "vitest run",
+        "run-tests-coverage": "vitest run --coverage",
         "run-tests-debug": "vitest run --inspect-brk",
         "watch-tests": "vitest"
     },
