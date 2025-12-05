@@ -4,19 +4,19 @@
  * @template T - The type of objects in the array
  * @param {T[]} arr - The array to sort
  * @param {(keyof T)[]} props - Array of property names to sort by (in priority order)
- * @param {('asc' | 'desc')[]} [orders] - Optional sort order for each property ('asc' or 'desc'). Defaults to 'asc'
+ * @param {('asc' | 'desc')[]} [orders] - Optional sort order for each property ('asc' or 'desc'). Defaults to 'asc'.
  * @returns {T[]} The sorted array
  *
  * @example
  * Sort by count descending, then tag ascending
  * ```
- * sortObjArray(tags, ['count', 'tag'], ['desc', 'asc']);
+ * const sortedObjs = sortObjArray(tags, ['count', 'tag'], ['desc', 'asc']);
  * ```
  *
  * @example
  * Sort by count descending (default order for other props is asc)
  * ```
- * sortObjArray(tags, ['count', 'tag'], ['desc']);
+ * const sortedObjs = sortObjArray(tags, ['count', 'tag'], ['desc']);
  * ```
  */
 export const sortObjArray = <T extends Record<string, any>>(

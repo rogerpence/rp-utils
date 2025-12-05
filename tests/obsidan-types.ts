@@ -4,8 +4,8 @@ export const TechnicalNoteFrontmatterSchema = z
     .object({
         title: z.string(),
         description: z.string(),
-        date_created: z.string(),
-        date_updated: z.string(),
+        date_created: z.union([z.string(), z.date()]),
+        date_updated: z.union([z.string(), z.date()]),
         date_published: z.string().nullable().optional(),
         pinned: z.boolean(),
         tags: z.array(z.string()),

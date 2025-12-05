@@ -281,6 +281,8 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
  * and parses it as YAML. The remaining content is returned as plain text.
  * Returns a Result type with either success (parsed data) or failure (error details).
  *
+ * This function converts string dates in the format 'yyyy-dd-dd' to Date data types.
+ *
  * @param filename - Absolute or relative path to the markdown file
  * @returns Promise resolving to ParseResult with success/failure information
  *
@@ -351,6 +353,10 @@ export const parseMarkdownFile = async (
                 parsed && typeof parsed === "object"
                     ? (parsed as Record<string, any>)
                     : {};
+
+            parsedFrontMatter =
+                convertFrontMatterStringDates(parsedFrontMatter);
+
             return {
                 success: true,
                 data: {
@@ -373,6 +379,35 @@ export const parseMarkdownFile = async (
         };
     }
 };
+
+function convertFrontMatterStringDates(
+    parsedFrontMatter: Record<string, any>
+): Record<string, any> {
+    const result: Record<string, any> = {};
+
+    // Iterate over all keys and values
+    for (const [key, value] of Object.entries(parsedFrontMatter)) {
+        // Process each key-value pair
+        //debugger;
+        console.log(`Key: ${key}, Value:`, value);
+
+        // You can check value types and convert dates
+        if (typeof value === "string") {
+            // Check if it's a date string (YYYY-MM-DD or YYYY-MM-DD HH:MM)
+            const datePattern = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/;
+            if (datePattern.test(value)) {
+                result[key] = new Date(value);
+            } else {
+                result[key] = value;
+            }
+        } else {
+            // Keep non-string values as-is
+            result[key] = value;
+        }
+    }
+
+    return result;
+}
 
 /**
  * Writes a ParsedMarkdown object to a file with YAML frontmatter.

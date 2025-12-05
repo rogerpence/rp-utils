@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
 
-import { getAppPath, deleteFile, writeTextFile } from "../../src/filesystem";
+import {
+    getAppPath,
+    deleteFile,
+    writeTextFile,
+    writeObjectToFile,
+} from "../../src/filesystem";
 
 import {
     getMarkdownObjects,
@@ -34,6 +39,13 @@ describe("converting markdown to objects", () => {
             const { successful, failed } = await getMarkdownObjects(
                 markdownDataPath
             );
+
+            const markdownOutputPath = path.join(
+                getAppPath(import.meta.url, "tests\\test-data\\output"),
+                "markdown-objects.json"
+            );
+
+            writeObjectToFile(successful, markdownOutputPath);
 
             expect(successful.length).toBe(4);
         });
