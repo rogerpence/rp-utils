@@ -389,7 +389,7 @@ function convertFrontMatterStringDates(
     for (const [key, value] of Object.entries(parsedFrontMatter)) {
         // Process each key-value pair
         //debugger;
-        console.log(`Key: ${key}, Value:`, value);
+        // console.log(`Key: ${key}, Value:`, value);
 
         // You can check value types and convert dates
         if (typeof value === "string") {
