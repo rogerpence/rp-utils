@@ -267,101 +267,6 @@ export function getAppPath(
     return resultPath;
 }
 
-// /**
-//  *
-//  * @param segments
-//  * @returns fully-qualified path to the file specified.
-//  *
-//  * @example
-//  * const outputFilePath = getPathForCli('markdown-objects.json');
-//  * //outputPath = blah/blah/src/lib/data/markdown-objects.json
-//  *
-//  * @remarks
-//  * This function is for use only for CLI use in the dev
-//  * environment. It will not work in a serverless deployment
-//  * environment.
-//  *
-//  * This function works only for files with 'src' in their path.
-//  *
-//  * This function is usually used to get a fully-qualified
-//  * file name in the '../src/lib/data' directory for CLI
-//  * reading and writing purposes.
-//  *
-//  * If only a single element is passed, that element is assumed
-//  * to be a file name in the /src/lib/data folder and a
-//  * fully-qualifed reference to that file name is returned.
-//  *
-//  * If multiple elements are passed, the last elenent is assumed
-//  * to be a file name, the preceding elements are folder names
-//  * under the 'src' folder. For example:
-//  *  const x = getPathForCli('markdown', 'kb', 'test.json')
-//  * returns the the fully qualified file name for
-//  * .../src/markdown/kb/test.json
-//  */
-
-// export function getPathForCli(...segments: string[]): string {
-//     // Regardless of where this source file is located, results
-//     // are always under SvelteKit's 'src' folder.
-
-//     const currentFilePath = process.cwd();
-//     if (!currentFilePath.includes("src")) {
-//         // throw exception
-//     }
-
-//     const srcPath = truncatePathAfterDirectory(currentFilePath, "src");
-
-//     if (segments.length == 1) {
-//         segments.push();
-//         segments = ["lib", "data", ...segments];
-//     }
-
-//     return path.join(srcPath, ...segments);
-// }
-
-// export function getPathForCli(
-//     initialDirectory: string,
-//     ...segments: string[]
-// ): string {
-//     // Regardless of where this source file is located, results
-//     // are always under SvelteKit's 'src' folder.
-
-//     const currentFilePath = process.cwd();
-//     console.log(currentFilePath);
-
-//     if (!currentFilePath.includes(initialDirectory)) {
-//         console.error(`The ${initialDirectory} is not in ${currentFilePath}`);
-//     }
-
-//     const srcPath = truncatePathAfterDirectory(
-//         currentFilePath,
-//         initialDirectory
-//     );
-
-//     if (initialDirectory === "src" && segments.length == 0) {
-//         segments = ["lib", "data"];
-//     }
-
-//     return path.join(srcPath, ...segments);
-// }
-
-// /**
-//  *
-//  * @param currentMetaUrl
-//  * @returns current parent path
-//  * @example
-//  * Pass in import.meta.url value of current file to get
-//  * its parent folder.
-//  * ```
-//  * const folder = getParentPath(import.meta.url);
-//  * ```
-//  * @remarks This is for use with CLI code only. Do not use on serverless environments.
-//  */
-// export function getParentPath(currentMetaUrl: string): string {
-//     const fullFilePath = fileURLToPath(currentMetaUrl);
-
-//     return path.dirname(fullFilePath);
-// }
-
 /**
  *
  * @param fullPath
@@ -426,7 +331,7 @@ export function writeObjectToFile(
     filePath: string,
     options?: WriteObjectToFileOptions
 ): void {
-    const { compressed = false, log = true } = options ?? {};
+    const { compressed = false, log = false } = options ?? {};
 
     try {
         // Ensure directory exists
