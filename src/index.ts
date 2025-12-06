@@ -4,3 +4,7 @@ export * from "./date";
 export * from "./filesystem";
 export * from "./markdown";
 export * from "./string";
+export * from "./math";
+export * from "./objects";
+export * from "./sort";
+export * from "./string";
