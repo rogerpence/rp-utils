@@ -23,6 +23,27 @@
     },
     {
         "dirent": {
+            "name": "animate-css-details-summary-element.md",
+            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
+            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
+        },
+        "markdownObject": {
+            "frontMatter": {
+                "title": "Animate CSS details-summary element",
+                "description": "Animate CSS details-summary element",
+                "date_created": "2025-05-18T00:00:00.000Z",
+                "date_updated": "2025-09-30T00:00:00.000Z",
+                "date_published": null,
+                "pinned": false,
+                "tags": [
+                    "design"
+                ]
+            },
+            "content": "\n# Animate CSS details-summary element without JavaScript\n\nAs of 30-Oct-2024 this feature requires enabling \"Experimental Web Platform Features\" in the chrome://flags/ or using Chrome 131 (the features necessary aren't yet in any other browsers--but the feature is a nice progressive enhancement for Chrome users).\n[CSS Weekly's CodePen that shows how to animate the details element](https://codepen.io/ZoranJambor/pen/jOorzPv)\n[Kevin Powell's (ripoff?) video about animating the details element](https://www.youtube.com/watch?v=Vzj3jSUbMtI)\n\n### Using JavaScript\n\nA version of animating the `details` tags using JavaScript is here:\n\n-   `E:\\luther-backup-2.0\\delray\\users-thumb-Documents\\Projects\\client\\html-css\\ui-examples\\accordion-04-detail-summary`\n-   The magic JavaScript in this project came this old CSS Tricks article. The JS class it provides is dead simple to use.\n"
+        }
+    },
+    {
+        "dirent": {
             "name": "add-postcss-to-sveltekit-project.md",
             "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
             "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
@@ -42,27 +63,6 @@
                 ]
             },
             "content": "\nSee also:\n\n [[use-postcss-and-open-props-with-sveltekit|See this doc too--I am not sure which came first]]\n\n> These instructions use the assets/files provided in this [GitHub repo](https://github.com/rogerpence/postcss-open-props-starter-kit).\n\nStep 1. Create a `css-dev` folder into root of Sveltekit project. This is where all the CSS dev work lives.\n\nCreate these two files in `css-dev`:\n\n```css\n/* css-dev/style.css */\n\n@import './main.css';\n```\n\n```css\n/* css-dev/main.css */\n\nbody {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 0;\n    box-sizing: border-box;\n}\n```\n\nThe `main.css` is where the primary CSS lives. Add other CSS files as needed. \n\nStep 2. Copy `postcss.config.mjs` (note: `.mjs` extension) into root of Sveltekit project.\n\n```js\nimport cssnano from 'cssnano';\nimport postcssImport from 'postcss-import';\nimport postcssCustomMedia from 'postcss-custom-media';\nimport openProps from 'open-props';\nimport postcssJitProps from 'postcss-jit-props';\nimport postcssGlobalData from '@csstools/postcss-global-data';\n// change\nimport { purgeCSSPlugin } from '@fullhuman/postcss-purgecss';\n\nconst DO_NOT_PRESERVE_UNRESOLVED_RULE = false;\n\nconsole.log('NODE_ENV', process.env.NODE_ENV);\n\n// change\n//module.exports = {\nexport default {\n    map: {inline: true},\n\tplugins: [\n\t\tpostcssImport(),\n\t\tpostcssJitProps(openProps),\n\t\tpostcssGlobalData({\n\t\t \tfiles: ['./node_modules/open-props/src/props.media.css']\n\t\t}),\n\t\tpostcssCustomMedia({\n\t\t\tpreserve: DO_NOT_PRESERVE_UNRESOLVED_RULE\n\t\t}),\n\n\t\t...(process.env.NODE_ENV === 'production'\n\t\t\t? [purgeCSSPlugin(\n\t\t\t\t{\n\t\t\t\t\tcontent: ['./src/routes/**/*.svelte'],\n\t\t\t\t\tsafelist: ['mt-48'],\n\t\t\t\t}\n\t\t\t)]\n\t\t\t: []),\n\n\t\t...(process.env.NODE_ENV === 'production' ? [cssnano()] : [])\n\t]\n};\n```\n\nThis line causes PostCSS to include in the final CSS only the Open Props that are referenced in your CSS.\n\nStep 3. Add these two commands to `scripts` node in `package.json`\n\n```\n\"postcss:build\": \"postcss ./css-dev/style.css ---dir ./src --env production\",\n\"postcss:watch\": \"postcss ./css-dev/style.css ---dir ./src --watch --verbose --env development\"\n```\n\nNote that the `style.css` produced is put in the root of the `./src` folder (alongside `app.html`). (Vite doesn't serve files from outside of the `src` folder.)\nStep 4. Add or edit  `+layout.svelte`  in the root of the `routes` folder to import the `style.css` file.\n\n```\n<script>\n    let { children } = $props();    \n\n    import '../style.css';\n</script>\n\n{@render children()}\n```\n\nImporting the the `style.css` file this way ensures that when changes are made in the CSS they are shown instantly when the app is running under the dev server.\n\nStep 5. Add these files with pnpm:\n\n```\n\"cssnano\": \"^6.0.1\",\n\"postcss-import\": \"^15.1.0\",\n\"postcss-custom-media\": \"^10.0.0\",\n\"open-props\": \"^1.5.10\",\n\"postcss-jit-props\": \"^1.0.13\",\n\"@csstools/postcss-global-data\": \"^2.0.1\",\n\"@fullhuman/postcss-purgecss\": \"^5.0.0\",\n\"postcss\": \"^8.4.25\",\n\"postcss-cli\": \"^10.1.0\"\n```\n\n> [!info]\n> You don't need to install and configure `CSSNano` because Vite and PostCSS implicitly compile/compress the CSS with the Sveltekit build step: `pnpm run build`. More on this shortly.\n\nto the dev dependencies of `package.json`.\n\nwith this command line:\n\n```\npnpm i -D cssnano postcss-import postcss-custom-media open-props postcss-jit-props @csstools/postcss-global-data @fullhuman/postcss-purgecss postcss postcss-cli\n```\n\nThe above options are examples what you might want to include. See the `purgecss` [docs](https://purgecss.com/configuration.html) for more information.\n\nStep 6. Run `pnpm i` one time to install the components listed in Step 5.\n\nStep 7. Run `pnpm run postcss:watch` to build the CSS during development\n\nStep 8. Run `pnpm run postcss:build` to build the CSS for production.\n\n## Some notes on [[https://open-props.style/|CSS Open Props]]\n\nIn `postcss.config.mjs`, this import pulls in the `postcss-jit-props` module.\n\n```\nimport postcssJitProps from 'postcss-jit-props';\n```\n\nIn the `plugins` section of `postcss.config.mjs`, the line below causes PostCSS to include in the final CSS only the Open Props that are referenced in your CSS.\n\n```\nplugins:[\n    ...\n    postcssJitProps(openProps),\n    ...\n]    \n```\n\n\n```\n@import \"./css-dev/_configure.css\";\n@import \"./css-dev/_resets.css\";\n@import \"./css-dev/_page.css\";\n@import \"./css-dev/_forms.css\";\n@import \"./css-dev/_utility.css\";\n\n:root {\n\t// Application-specific variables.\n    --accent-color: var(--orange-7);\n    ...\n}\n```\n\nAfter doing `npm run build` you can see the compiled CSS here: (the CSS file name will vary)\n\n```\n.svelte-kit\\output\\client\\_app\\immutable\\assets\\0.2b389f06.css\n```\n### Using Vite with PostCSS and Open Props is so cool\n\nBy using [postcss-jit-props](https://github.com/GoogleChromeLabs/postcss-jit-props), you can now use any of the CSS Open Props in your CSS and Vite uses PostCSS to ensure that the variables are selectively imported for you (that is, the only CSS Open Props imported are the ones you need).\n\nFor example, a `+page.svelte` file like this:\n\n```\n<h1>About</h1>\n\n<style>\n\th1 {\n\t\tcolor: var(--purple-4);\n\t\tfont-size: var(--font-size-2);\n\t}\n</style>\n```\n\nInjects this CSS during the Sveltekit build process:\n\n```\n:root{--purple-4:#da77f2;--font-size-2:1.1rem}h1.svelte-6n23wp{color:var(--purple-4);font-size:var(--font-size-2)}\n```\n\nYou don't need to worry about any explicit CSS tree shaking. In the blink of an eye, the `post-jit-props` `PostCSS` plugin prunes your CSS to include only the Open Props variables referenced in your app's CSS.\n\nThis process is crazy fast (you won't notice any lag during development as `Vite/PostCSS` keeps your CSS current) and there is hardly any configuration. What's not to love!\n\n"
-        }
-    },
-    {
-        "dirent": {
-            "name": "animate-css-details-summary-element.md",
-            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
-            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
-        },
-        "markdownObject": {
-            "frontMatter": {
-                "title": "Animate CSS details-summary element",
-                "description": "Animate CSS details-summary element",
-                "date_created": "2025-05-18T00:00:00.000Z",
-                "date_updated": "2025-09-30T00:00:00.000Z",
-                "date_published": null,
-                "pinned": false,
-                "tags": [
-                    "design"
-                ]
-            },
-            "content": "\n# Animate CSS details-summary element without JavaScript\n\nAs of 30-Oct-2024 this feature requires enabling \"Experimental Web Platform Features\" in the chrome://flags/ or using Chrome 131 (the features necessary aren't yet in any other browsers--but the feature is a nice progressive enhancement for Chrome users).\n[CSS Weekly's CodePen that shows how to animate the details element](https://codepen.io/ZoranJambor/pen/jOorzPv)\n[Kevin Powell's (ripoff?) video about animating the details element](https://www.youtube.com/watch?v=Vzj3jSUbMtI)\n\n### Using JavaScript\n\nA version of animating the `details` tags using JavaScript is here:\n\n-   `E:\\luther-backup-2.0\\delray\\users-thumb-Documents\\Projects\\client\\html-css\\ui-examples\\accordion-04-detail-summary`\n-   The magic JavaScript in this project came this old CSS Tricks article. The JS class it provides is dead simple to use.\n"
         }
     },
     {
