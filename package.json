@@ -1,6 +1,6 @@
 {
     "name": "@rogerpence/rp-utils",
-    "version": "1.0.41",
+    "version": "1.0.42",
     "type": "module",
     "main": "./src/index.js",
     "exports": {
