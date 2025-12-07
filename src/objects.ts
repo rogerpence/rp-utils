@@ -1,23 +1,5 @@
 import { divideWithRemainder } from "./math";
-import { type NavigationObject } from "./markdown";
-
-/**
- * Represents the result of a pagination operation containing page data and metadata. See {@link getPagedData}
- * @template T returns {PagerObj<T>} Object containing paginated data and metadata.
- * @property {number} pageNumber - The current page number (1-based)
- * @property {boolean} isFirstPage - True if this is the first page
- * @property {boolean} isLastPage - True if this is the last page
- * @property {number} totalPages - Total number of pages available
- * @property {number} rowsReturned - Total number of rows for this page returned
- */
-export type PagerObj<T> = {
-    pagedData: NavigationObject<T>[];
-    pageNumber: number;
-    isFirstPage: boolean;
-    isLastPage: boolean;
-    totalPages: number;
-    rowsReturned: number;
-};
+import { type NavigationObject, type PagerObj } from "./types";
 
 /**
  * Paginates an array of navigation objects and returns page metadata.

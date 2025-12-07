@@ -2,7 +2,16 @@ import * as yaml from "js-yaml";
 import { promises as fsa } from "fs";
 import path from "path";
 import { z } from "zod";
-import { PagerObj } from "./objects";
+import {
+    PagerObj,
+    MarkdownParseResult,
+    DirentInfo,
+    MarkdownFileResult,
+    MarkdownObjectsValidState,
+    MarkdownDocument,
+    ParseResult,
+    ParsedMarkdown,
+} from "./types";
 
 import {
     deleteFile,
@@ -12,162 +21,6 @@ import {
 } from "./filesystem";
 
 import { convertDateToStringYYYY_MM_DD } from "./date";
-
-// ============================================================================
-// Type Definitions
-// ============================================================================
-
-/**
- * A proxy for the fs.Dirent object. SvelteKit does not allow referencing the FS module in client-side code.
- */
-export type DirentInfo = {
-    name: string;
-    path: string;
-    parentPath: string;
-};
-
-/**
- * Represents a validated markdown file with strongly-typed frontmatter.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownObject<T extends Record<string, any>> = {
-    content: string;
-    frontMatter: T;
-};
-
-/**
- * Represents a markdown object with direent meta info.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownDocument<T extends Record<string, any>> = {
-    dirent: DirentInfo;
-    markdownObject: MarkdownObject<T>;
-};
-
-/**
- * Represents a parsed markdown file with frontmatter and content.
- *
- * @template T - The type of the frontmatter object (defaults to Record<string, any>)
- */
-export interface ParsedMarkdown<
-    T extends Record<string, any> = Record<string, any>
-> {
-    /** The parsed YAML frontmatter as an object */
-    frontMatter: T;
-    /** The markdown content (everything after the frontmatter) */
-    content: string;
-}
-
-/**
- * Result of parsing a single markdown file.
- * Contains either success with parsed data or failure with error information.
- */
-export type ParseResult =
-    | {
-          success: true;
-          data: { frontMatter: Record<string, any>; content: string };
-      }
-    | { success: false; error: string; filename: string };
-
-/**
- * Represents a markdown file with its file system information and parsed content.
- * The frontmatter is untyped (Record<string, any>) until validated.
- */
-export type MarkdownFileResult = {
-    /** File system directory entry information */
-    dirent: DirentInfo;
-    /** Parsed markdown content with untyped frontmatter */
-    markdownObject: {
-        frontMatter: Record<string, any>;
-        content: string;
-    };
-};
-
-/**
- * Result of parsing multiple markdown files from a directory.
- * Separates successfully parsed files from failed ones.
- */
-export type MarkdownParseResult = {
-    /** Array of successfully parsed markdown files */
-    successful: MarkdownFileResult[];
-    /** Array of files that failed to parse with error information */
-    failed: Array<{
-        filename: string;
-        dirent: DirentInfo;
-        error: string;
-    }>;
-};
-
-/**
- * Result of validating markdown files against a Zod schema.
- * Contains validation statistics, errors, and successfully validated objects.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownObjectsValidState<T extends Record<string, any>> = {
-    /** Total number of files found */
-    filesFound: number;
-    /** Number of files that passed validation */
-    filesValid: number;
-    /** Array of validation error messages */
-    validationErrors: string[];
-    /** Array of successfully validated markdown files with typed frontmatter */
-    validatedObjects: MarkdownDocument<T>[];
-};
-
-/**
- *
- * Represents a complete index object that extends frontmatter with additional metadata.
- *
- * This type uses TypeScript's intersection (`&`) to combine all properties from the
- * generic frontmatter type `T` with index-specific properties.
- *
- * @template T - The frontmatter type
- *
- * @remarks
- * This type includes all properties from `T` plus four additional properties:
- * - `content`: The full markdown content
- * - `locale`: Language/region identifier
- * - `slug`: URL-friendly identifier
- * - `folder`: Directory path
- *
- * For a version without the `content` property, see {@link NavigationObject}.
- *
- * @example
- * Creating an IndexObject with TechnicalNoteFrontmatter
- * ```typescript
- * const indexObj: IndexObject<TechnicalNoteFrontmatter> = {
- *   All TechnicalNoteFrontmatter properties:
- *   title: 'My Post',
- *   description: 'A description',
- *   date_created: '2025-01-01',
- *   date_updated: '2025-01-02',
- *   date_published: null,
- *   pinned: false,
- *   tags: ['javascript'],
- *   Plus IndexObject-specific properties:
- *   content: '# Markdown content here',
- *   locale: 'en',
- *   slug: '/technical-posts/my-post',
- *   folder: 'technical-posts'
- * };
- * ```
- * @see {@link NavigationObject} for a version without content
- * @see {@link PagerObj} for paginated results containing NavigationObject
- */
-export type IndexObject<T> = T & {
-    content: string;
-    locale: string;
-    slug: string;
-    folder: string;
-};
-
-/**
- * @template T
- */
-export type NavigationObject<T> = Omit<IndexObject<T>, "content">;
 
 // /**
 //  * Collection of markdown files with validation statistics.

@@ -1,12 +1,4 @@
-/**
- * Return type for the divMod function containing both division result and modulo.
- */
-export type DivMod = {
-    /** The quotient (result of integer division) */
-    quotient: number;
-    /** The remainder (modulo) */
-    remainder: number;
-};
+import { DivMod } from "./types";
 
 /**
  * Performs division and modulo operations simultaneously.

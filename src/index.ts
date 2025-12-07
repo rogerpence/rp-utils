@@ -8,3 +8,4 @@ export * from "./math";
 export * from "./objects";
 export * from "./sort";
 export * from "./string";
+export * from "./types";

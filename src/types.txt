@@ -2,7 +2,7 @@ import { getPagedData } from "./objects";
 import { writeObjectToFile } from "./filesystem";
 
 // ============================================================================
-// Type Definitions (Alphabetically Sorted)
+// Type Definitions
 // ============================================================================
 
 /**
@@ -15,13 +15,94 @@ export type DirentInfo = {
 };
 
 /**
- * Return type for the divMod function containing both division result and modulo.
+ * Represents a validated markdown file with strongly-typed frontmatter.
+ *
+ * @template T - The validated type of the frontmatter object
  */
-export type DivMod = {
-    /** The quotient (result of integer division) */
-    quotient: number;
-    /** The remainder (modulo) */
-    remainder: number;
+export type MarkdownObject<T extends Record<string, any>> = {
+    content: string;
+    frontMatter: T;
+};
+
+/**
+ * Represents a markdown object with direent meta info.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type MarkdownDocument<T extends Record<string, any>> = {
+    dirent: DirentInfo;
+    markdownObject: MarkdownObject<T>;
+};
+
+/**
+ * Represents a parsed markdown file with frontmatter and content.
+ *
+ * @template T - The type of the frontmatter object (defaults to Record<string, any>)
+ */
+export interface ParsedMarkdown<
+    T extends Record<string, any> = Record<string, any>
+> {
+    /** The parsed YAML frontmatter as an object */
+    frontMatter: T;
+    /** The markdown content (everything after the frontmatter) */
+    content: string;
+}
+
+/**
+ * Result of parsing a single markdown file.
+ * Contains either success with parsed data or failure with error information.
+ */
+export type ParseResult =
+    | {
+          success: true;
+          data: { frontMatter: Record<string, any>; content: string };
+      }
+    | { success: false; error: string; filename: string };
+
+/**
+ * Represents a markdown file with its file system information and parsed content.
+ * The frontmatter is untyped (Record<string, any>) until validated.
+ */
+export type MarkdownFileResult = {
+    /** File system directory entry information */
+    dirent: DirentInfo;
+    /** Parsed markdown content with untyped frontmatter */
+    markdownObject: {
+        frontMatter: Record<string, any>;
+        content: string;
+    };
+};
+
+/**
+ * Result of parsing multiple markdown files from a directory.
+ * Separates successfully parsed files from failed ones.
+ */
+export type MarkdownParseResult = {
+    /** Array of successfully parsed markdown files */
+    successful: MarkdownFileResult[];
+    /** Array of files that failed to parse with error information */
+    failed: Array<{
+        filename: string;
+        dirent: DirentInfo;
+        error: string;
+    }>;
+};
+
+/**
+ * Result of validating markdown files against a Zod schema.
+ * Contains validation statistics, errors, and successfully validated objects.
+ *
+ * @template T - The validated type of the frontmatter object
+ */
+export type MarkdownObjectsValidState<T extends Record<string, any>> = {
+    /** Total number of files found */
+    filesFound: number;
+    /** Number of files that passed validation */
+    filesValid: number;
+    /** Array of validation error messages */
+    validationErrors: string[];
+    /** Array of successfully validated markdown files with typed frontmatter */
+    validatedObjects: MarkdownDocument<T>[];
 };
 
 /**
@@ -72,72 +153,6 @@ export type IndexObject<T> = T & {
 };
 
 /**
- * Represents a markdown object with direent meta info.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownDocument<T extends Record<string, any>> = {
-    dirent: DirentInfo;
-    markdownObject: MarkdownObject<T>;
-};
-
-/**
- * Represents a markdown file with its file system information and parsed content.
- * The frontmatter is untyped (Record<string, any>) until validated.
- */
-export type MarkdownFileResult = {
-    /** File system directory entry information */
-    dirent: DirentInfo;
-    /** Parsed markdown content with untyped frontmatter */
-    markdownObject: {
-        frontMatter: Record<string, any>;
-        content: string;
-    };
-};
-
-/**
- * Represents a validated markdown file with strongly-typed frontmatter.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownObject<T extends Record<string, any>> = {
-    content: string;
-    frontMatter: T;
-};
-
-/**
- * Result of validating markdown files against a Zod schema.
- * Contains validation statistics, errors, and successfully validated objects.
- *
- * @template T - The validated type of the frontmatter object
- */
-export type MarkdownObjectsValidState<T extends Record<string, any>> = {
-    /** Total number of files found */
-    filesFound: number;
-    /** Number of files that passed validation */
-    filesValid: number;
-    /** Array of validation error messages */
-    validationErrors: string[];
-    /** Array of successfully validated markdown files with typed frontmatter */
-    validatedObjects: MarkdownDocument<T>[];
-};
-
-/**
- * Result of parsing multiple markdown files from a directory.
- * Separates successfully parsed files from failed ones.
- */
-export type MarkdownParseResult = {
-    /** Array of successfully parsed markdown files */
-    successful: MarkdownFileResult[];
-    /** Array of files that failed to parse with error information */
-    failed: Array<{
-        filename: string;
-        dirent: DirentInfo;
-        error: string;
-    }>;
-};
-
-/**
  * @template T
  */
 export type NavigationObject<T> = Omit<IndexObject<T>, "content">;
@@ -161,29 +176,14 @@ export type PagerObj<T> = {
 };
 
 /**
- * Represents a parsed markdown file with frontmatter and content.
- *
- * @template T - The type of the frontmatter object (defaults to Record<string, any>)
+ * Return type for the divMod function containing both division result and modulo.
  */
-export interface ParsedMarkdown<
-    T extends Record<string, any> = Record<string, any>
-> {
-    /** The parsed YAML frontmatter as an object */
-    frontMatter: T;
-    /** The markdown content (everything after the frontmatter) */
-    content: string;
-}
-
-/**
- * Result of parsing a single markdown file.
- * Contains either success with parsed data or failure with error information.
- */
-export type ParseResult =
-    | {
-          success: true;
-          data: { frontMatter: Record<string, any>; content: string };
-      }
-    | { success: false; error: string; filename: string };
+export type DivMod = {
+    /** The quotient (result of integer division) */
+    quotient: number;
+    /** The remainder (modulo) */
+    remainder: number;
+};
 
 /**
  * Options for the {@link writeObjectToFile} function.
