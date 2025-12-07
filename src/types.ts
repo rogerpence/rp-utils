@@ -5,7 +5,7 @@ import { writeObjectToFile } from "./filesystem";
 // Type Definitions (Alphabetically Sorted)
 // ============================================================================
 
-/**
+/**bum
  * A proxy for the fs.Dirent object. SvelteKit does not allow referencing the FS module in client-side code.
  */
 export type DirentInfo = {
