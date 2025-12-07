@@ -2,6 +2,7 @@ import * as yaml from "js-yaml";
 import { promises as fsa } from "fs";
 import path from "path";
 import { z } from "zod";
+import { PagerObj } from "./objects";
 
 import {
     deleteFile,
@@ -115,6 +116,58 @@ export type MarkdownObjectsValidState<T extends Record<string, any>> = {
     /** Array of successfully validated markdown files with typed frontmatter */
     validatedObjects: MarkdownDocument<T>[];
 };
+
+/**
+ *
+ * Represents a complete index object that extends frontmatter with additional metadata.
+ *
+ * This type uses TypeScript's intersection (`&`) to combine all properties from the
+ * generic frontmatter type `T` with index-specific properties.
+ *
+ * @template T - The frontmatter type
+ *
+ * @remarks
+ * This type includes all properties from `T` plus four additional properties:
+ * - `content`: The full markdown content
+ * - `locale`: Language/region identifier
+ * - `slug`: URL-friendly identifier
+ * - `folder`: Directory path
+ *
+ * For a version without the `content` property, see {@link NavigationObject}.
+ *
+ * @example
+ * Creating an IndexObject with TechnicalNoteFrontmatter
+ * ```typescript
+ * const indexObj: IndexObject<TechnicalNoteFrontmatter> = {
+ *   All TechnicalNoteFrontmatter properties:
+ *   title: 'My Post',
+ *   description: 'A description',
+ *   date_created: '2025-01-01',
+ *   date_updated: '2025-01-02',
+ *   date_published: null,
+ *   pinned: false,
+ *   tags: ['javascript'],
+ *   Plus IndexObject-specific properties:
+ *   content: '# Markdown content here',
+ *   locale: 'en',
+ *   slug: '/technical-posts/my-post',
+ *   folder: 'technical-posts'
+ * };
+ * ```
+ * @see {@link NavigationObject} for a version without content
+ * @see {@link PagerObj} for paginated results containing NavigationObject
+ */
+export type IndexObject<T> = T & {
+    content: string;
+    locale: string;
+    slug: string;
+    folder: string;
+};
+
+/**
+ * @template T
+ */
+export type NavigationObject<T> = Omit<IndexObject<T>, "content">;
 
 // /**
 //  * Collection of markdown files with validation statistics.
