@@ -1,7 +1,7 @@
 import * as yaml from "js-yaml";
 import { promises as fsa } from "fs";
 import path from "path";
-import { z } from "zod";
+import { startsWith, z } from "zod";
 import {
     PagerObj,
     MarkdownParseResult,
@@ -238,6 +238,7 @@ export const parseMarkdownFile = async (
 
     let frontMatterDelimiterCount = 0;
     let inFrontMatter = false;
+    let firstContentH1Found = false;
 
     for (const line of fileLines) {
         if (line.trim() === "---") {
@@ -253,7 +254,12 @@ export const parseMarkdownFile = async (
         if (inFrontMatter) {
             frontMatterLines.push(line);
         } else if (frontMatterDelimiterCount >= 2) {
-            contentLines.push(line);
+            // Ignore first H1 (#) in markdown
+            if (line.trimStart().startsWith("# ") && !firstContentH1Found) {
+                firstContentH1Found = true;
+            } else {
+                contentLines.push(line);
+            }
         } else if (frontMatterDelimiterCount === 0) {
             // No frontMatter found, treat everything as content
             contentLines.push(line);
