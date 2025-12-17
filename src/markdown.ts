@@ -254,12 +254,13 @@ export const parseMarkdownFile = async (
         if (inFrontMatter) {
             frontMatterLines.push(line);
         } else if (frontMatterDelimiterCount >= 2) {
-            // Ignore first H1 (#) in markdown
-            if (line.trimStart().startsWith("# ") && !firstContentH1Found) {
-                firstContentH1Found = true;
-            } else {
-                contentLines.push(line);
-            }
+            contentLines.push(line);
+            // // Ignore first H1 (#) in markdown
+            // if (line.trimStart().startsWith("# ") && !firstContentH1Found) {
+            //     firstContentH1Found = true;
+            // } else {
+            //     contentLines.push(line);
+            // }
         } else if (frontMatterDelimiterCount === 0) {
             // No frontMatter found, treat everything as content
             contentLines.push(line);
