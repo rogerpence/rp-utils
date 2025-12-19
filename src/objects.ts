@@ -35,7 +35,7 @@ export function getPagedData<T extends Record<string, any>>(
     const startIndex = (pageNumber - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const pagedData = allObjects.slice(startIndex, endIndex);
-    const pageCount = divideWithRemainder(allObjects.length, 10);
+    const pageCount = divideWithRemainder(allObjects.length, pageSize);
     const lastPage =
         pageCount.remainder === 0 ? pageCount.quotient : pageCount.quotient + 1;
 
