@@ -1,37 +1,37 @@
 import { describe, it, expect } from "vitest";
 import { getAppPath, getProjectRoot } from "../../src/filesystem";
-import { fileURLToPath } from "url";
-import path from "path";
-const fs = require("fs");
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+// const fs = require("fs");
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 describe("test file path stuff", () => {
     describe("getProjectRoot", () => {
         it("should show success", () => {
             let root = getProjectRoot(fileURLToPath(import.meta.url));
             expect(root).toBe(
-                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils",
             );
 
             root = getProjectRoot(import.meta.url);
             expect(root).toBe(
-                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils"
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils",
             );
 
-            let path = getAppPath(fileURLToPath(import.meta.url), "tests");
-            expect(path).toBe(
-                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests"
+            let appPath = getAppPath(fileURLToPath(import.meta.url), "tests");
+            expect(appPath).toBe(
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests",
             );
 
-            path = getAppPath(
+            appPath = getAppPath(
                 fileURLToPath(import.meta.url),
                 "tests",
-                "testfile.json"
+                "testfile.json",
             );
-            expect(path).toBe(
-                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\testfile.json"
+            expect(appPath).toBe(
+                "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\testfile.json",
             );
         });
     });

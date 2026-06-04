@@ -30,7 +30,7 @@ import { type NavigationObject, type PagerObj } from "./types";
 export function getPagedData<T extends Record<string, any>>(
     allObjects: NavigationObject<T>[],
     pageSize: number,
-    pageNumber: number
+    pageNumber: number,
 ): PagerObj<T> {
     const startIndex = (pageNumber - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -149,13 +149,13 @@ export class Pager<T> {
     getBoundingRowsForPage(pageNumber: number) {
         if (!this.isValidPage(pageNumber)) {
             throw new RangeError(
-                `Page number must be between 1 and ${this.totalPages}`
+                `Page number must be between 1 and ${this.totalPages}`,
             );
         }
 
         let boundingRows = this.#getBoundingRowsForPage(
             pageNumber,
-            this.pageSize
+            this.pageSize,
         );
         if (boundingRows.last >= this.rowCount) {
             boundingRows.last = this.rowCount - 1;
@@ -182,7 +182,7 @@ export class Pager<T> {
     getRowsForPage(pageNumber: number) {
         if (!this.isValidPage(pageNumber)) {
             throw new RangeError(
-                `Page number must be between 1 and ${this.totalPages}`
+                `Page number must be between 1 and ${this.totalPages}`,
             );
         }
 
@@ -213,7 +213,7 @@ export class Pager<T> {
     getPageRange(currentPage: number, range: number = 2): number[] {
         if (!this.isValidPage(currentPage)) {
             throw new RangeError(
-                `Page number must be between 1 and ${this.totalPages}`
+                `Page number must be between 1 and ${this.totalPages}`,
             );
         }
         if (range < 0 || !Number.isInteger(range)) {
@@ -234,7 +234,7 @@ export class Pager<T> {
      */
     getAllPages() {
         return Array.from({ length: this.totalPages }, (_, i) =>
-            this.getRowsForPage(i + 1)
+            this.getRowsForPage(i + 1),
         );
     }
 
@@ -297,5 +297,48 @@ export class Pager<T> {
             first: last - pageSize + 1,
             last,
         };
+    }
+}
+
+export type JSONValue =
+    | string
+    | number
+    | boolean
+    | null
+    | JSONValue[]
+    | { [key: string]: JSONValue }
+    | {
+          name: string;
+          tags: string[];
+      }
+    | {
+          other: JSONValue[];
+      };
+
+export function walkJson(
+    value: JSONValue,
+    visit: (info: {
+        path: string;
+        key: string | number | null;
+        value: JSONValue;
+    }) => void,
+    path = "",
+    key: string | number | null = null,
+): void {
+    visit({ path, key, value });
+
+    if (Array.isArray(value)) {
+        for (let i = 0; i < value.length; i++) {
+            const childPath = path ? `${path}[${i}]` : `[${i}]`;
+            walkJson(value[i] as JSONValue, visit, childPath, i);
+        }
+        return;
+    }
+
+    if (value !== null && typeof value === "object") {
+        for (const [k, v] of Object.entries(value)) {
+            const childPath = path ? `${path}.${k}` : k;
+            walkJson(v as JSONValue, visit, childPath, k);
+        }
     }
 }
