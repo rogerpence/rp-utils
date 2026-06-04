@@ -300,6 +300,12 @@ export class Pager<T> {
     }
 }
 
+/**
+ * Represents a recursive JSON-compatible value.
+ *
+ * Includes primitive JSON values, arrays, and objects whose properties
+ * are themselves JSONValue instances.
+ */
 export type JSONValue =
     | string
     | number
@@ -315,6 +321,20 @@ export type JSONValue =
           other: JSONValue[];
       };
 
+/**
+ * Walks a JSON-like value depth-first and invokes a callback for each node.
+ *
+ * @param value - Root JSON value to traverse.
+ * @param visit - Callback invoked for each visited node with path metadata.
+ * @param path - Internal path accumulator for recursion.
+ * @param key - Internal key/index for the current node.
+ * @returns Nothing.
+ *
+ * @remarks
+ * The root node is visited first with an empty path and `null` key.
+ * Array elements use bracket notation (for example, `[0]`) and object
+ * properties use dot notation (for example, `user.tags`).
+ */
 export function walkJson(
     value: JSONValue,
     visit: (info: {

@@ -1,5 +1,5 @@
-// import { getPagedData } from "./objects";
-// import { writeObjectToFile } from "./filesystem";
+import type { getPagedData } from "./objects";
+import type { writeObjectToFile } from "./filesystem";
 
 // ============================================================================
 // Type Definitions (Alphabetically Sorted)
@@ -166,7 +166,7 @@ export type PagerObj<T> = {
  * @template T - The type of the frontmatter object (defaults to Record<string, any>)
  */
 export interface ParsedMarkdown<
-    T extends Record<string, any> = Record<string, any>
+    T extends Record<string, any> = Record<string, any>,
 > {
     /** The parsed YAML frontmatter as an object */
     frontMatter: T;
