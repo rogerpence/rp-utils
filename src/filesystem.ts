@@ -5,6 +5,27 @@ import fs, { promises as fsa } from "fs";
 import { WriteObjectToFileOptions } from "./types";
 
 /**
+ * Runtime enum-like map of supported path classifications.
+ *
+ * Use these values for comparisons at runtime (for example,
+ * `kind === PathKind.Absolute`).
+ */
+export const PathKind = Object.freeze({
+    Empty: "empty",
+    Absolute: "absolute",
+    FilenameOnly: "filename-only",
+    Relative: "relative",
+} as const);
+
+/**
+ * Union type of all supported path classification values.
+ *
+ * This type is derived from {@link PathKind} so runtime values and
+ * compile-time types stay in sync.
+ */
+export type PathKind = (typeof PathKind)[keyof typeof PathKind];
+
+/**
  * Checks if a file exists at the specified path.
  *
  * @param filePath - The path to the file to check
@@ -87,7 +108,7 @@ export async function deleteFile(filePath: string): Promise<boolean> {
  * @returns An array of fs.Dirent objects, or undefined if the directory doesn't exist or an error occurs
  */
 export const getDirEntries = (
-    targetDirectory: string
+    targetDirectory: string,
 ): fs.Dirent[] | undefined => {
     try {
         // Check if directory exists synchronously
@@ -117,7 +138,7 @@ export const getDirEntries = (
  * @returns An array of fs.Dirent objects for files only, or undefined if an error occurs
  */
 export const getAllDirEntries = (
-    targetDirectory: string
+    targetDirectory: string,
 ): fs.Dirent[] | undefined => {
     try {
         // Check if directory exists
@@ -138,7 +159,7 @@ export const getAllDirEntries = (
             if (entry.isDirectory()) {
                 const fullPath = path.join(
                     entry.parentPath || targetDirectory,
-                    entry.name
+                    entry.name,
                 );
                 const subEntries = getAllDirEntries(fullPath);
 
@@ -249,7 +270,7 @@ export function getProjectRoot(filePath: string): string {
 export function getAppPath(
     filePath: string,
     additionalPath: string,
-    fileName?: string
+    fileName?: string,
 ): string {
     const projectRoot = getProjectRoot(filePath);
 
@@ -284,7 +305,7 @@ export function getAppPath(
  */
 export function getTruncatedPath(
     fullPath: string,
-    lastDirectory: string
+    lastDirectory: string,
 ): string {
     const parts = fullPath.split(path.sep);
 
@@ -324,28 +345,37 @@ export function getTruncatedPath(
 export function writeObjectToFile(
     object: unknown,
     filePath: string,
-    options?: WriteObjectToFileOptions
+    options?: WriteObjectToFileOptions,
 ): void {
     const { compressed = false, log = false } = options ?? {};
 
+    let dir: string = "";
+
     try {
-        // Ensure directory exists
-        const dir = path.dirname(filePath);
-        if (!fs.existsSync(dir)) {
-            console.error(`writeObjectToFile error:  ${dir} not found`);
-            process.exit(1);
+        // Ensure target directory exists
+        const filePathClass = classifyFilePath(filePath);
+
+        if (filePathClass == PathKind.Absolute) {
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) {
+                console.error(`writeObjectToFile error:  ${dir} not found`);
+                process.exit(1);
+            }
         }
 
         if (filePath.endsWith(".json") && options?.exportName) {
             console.error(
-                `writeObjectToFile error:  Cannot not write to .json file with export name`
+                `writeObjectToFile error:  Cannot not write to .json file with export name`,
             );
             process.exit(1);
         }
 
-        if (filePath.endsWith(".js") && !options?.exportName) {
+        if (
+            filePath.endsWith(".js") ||
+            (filePath.endsWith(".ts") && !options?.exportName)
+        ) {
             console.error(
-                `writeObjectToFile error:  Must provide an export name for a .js`
+                `writeObjectToFile error:  Must provide an export name for a .js`,
             );
             process.exit(1);
         }
@@ -381,4 +411,36 @@ export function writeObjectToFile(
  */
 export function writeTextFile(text: string, filename: string): void {
     fs.writeFileSync(`${filename}`, text);
+}
+
+/**
+ * Classifies a file path string as empty, absolute, filename-only, or relative.
+ *
+ * Classification rules:
+ * - empty: blank or whitespace-only input
+ * - absolute: OS-absolute paths, including Windows drive and UNC forms
+ * - filename-only: contains no path separators
+ * - relative: non-empty path containing separators that is not absolute
+ *
+ * @param filePath Path string to classify.
+ * @returns A {@link PathKind} value describing the input path shape.
+ */
+export function classifyFilePath(filePath: string): PathKind {
+    const p = filePath.trim();
+    if (!p) return "empty";
+
+    // Absolute path on current OS
+    if (path.isAbsolute(p)) return "absolute";
+
+    // Optional: catch Windows drive-rooted forms even if running on non-Windows
+    if (/^[a-zA-Z]:[\\/]/.test(p) || /^\\\\[^\\]+\\[^\\]+/.test(p)) {
+        return "absolute";
+    }
+
+    // If no slash characters, it is just a file name
+    const hasSeparators = /[\\/]/.test(p);
+    if (!hasSeparators) return "filename-only";
+
+    // Otherwise it's a relative path
+    return "relative";
 }

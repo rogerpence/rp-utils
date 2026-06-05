@@ -311,7 +311,7 @@ export type JSONValue =
     | number
     | boolean
     | null
-    | JSONValue[]
+    | JSONValue[] 
     | { [key: string]: JSONValue }
     | {
           name: string;
