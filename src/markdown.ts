@@ -63,7 +63,7 @@ import { convertDateToStringYYYY_MM_DD } from "./date";
  * ```
  */
 export async function getMarkdownObjects(
-    folder: string
+    folder: string,
 ): Promise<MarkdownParseResult> {
     const fileInfo: DirentInfo[] = getAllDirEntries(folder) ?? [];
 
@@ -87,7 +87,7 @@ export async function getMarkdownObjects(
                     error: result.error,
                 });
             }
-        })
+        }),
     );
 
     return { successful, failed };
@@ -135,9 +135,10 @@ export async function getMarkdownObjects(
  * }
  * ```
  */
-export function validateMarkdownObjects<T extends Record<string, any>>(
+//export function validateMarkdownObjects<T extends Record<string, any>>(
+export function validateMarkdownObjects<T extends z.ZodTypeAny>(
     objects: MarkdownFileResult[],
-    schema: z.ZodSchema<T>
+    schema: z.ZodSchema<T>,
 ): MarkdownObjectsValidState<T> {
     const validationErrors: string[] = [];
     const validatedObjects: MarkdownDocument<T>[] = [];
@@ -153,7 +154,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
         if (!result.success) {
             const fullFilename = path.join(
                 obj.dirent.parentPath,
-                obj.dirent.name
+                obj.dirent.name,
             );
             result.error.issues.forEach((issue) => {
                 if (fullFilename !== previousFilename) {
@@ -161,7 +162,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
                     previousFilename = fullFilename;
                 }
                 validationErrors.push(
-                    `    Error: ${issue.path.join(".")}: ${issue.message}`
+                    `    Error: ${issue.path.join(".")}: ${issue.message}`,
                 );
             });
         } else {
@@ -179,8 +180,8 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
     if (validationErrors.length > 0) {
         validationErrors.unshift(
             `Frontmatter Validation Errors  ${convertDateToStringYYYY_MM_DD(
-                now
-            )} ${now.toLocaleTimeString()}`
+                now,
+            )} ${now.toLocaleTimeString()}`,
         );
     }
 
@@ -228,7 +229,7 @@ export function validateMarkdownObjects<T extends Record<string, any>>(
  * ```
  */
 export const parseMarkdownFile = async (
-    filename: string
+    filename: string,
 ): Promise<ParseResult> => {
     const allFileContents = await fsa.readFile(filename, "utf-8");
     const fileLines = allFileContents.split(/\r?\n/);
@@ -306,7 +307,7 @@ export const parseMarkdownFile = async (
 };
 
 function convertFrontMatterStringDates(
-    parsedFrontMatter: Record<string, any>
+    parsedFrontMatter: Record<string, any>,
 ): Record<string, any> {
     const result: Record<string, any> = {};
 
@@ -382,7 +383,7 @@ function convertFrontMatterStringDates(
  */
 export const writeMarkdownFile = async (
     parsedMarkdown: ParsedMarkdown,
-    outputFilename: string
+    outputFilename: string,
 ): Promise<void> => {
     try {
         let markdownContent = "";
@@ -420,7 +421,7 @@ export const writeMarkdownFile = async (
         console.log(`Successfully wrote markdown file: ${outputFilename}`);
     } catch (error) {
         throw new Error(
-            `Failed to write markdown file ${outputFilename}: ${error}`
+            `Failed to write markdown file ${outputFilename}: ${error}`,
         );
     }
 };
