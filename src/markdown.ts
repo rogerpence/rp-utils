@@ -135,10 +135,16 @@ export async function getMarkdownObjects(
  * }
  * ```
  */
-//export function validateMarkdownObjects<T extends Record<string, any>>(
-export function validateMarkdownObjects<T extends z.ZodTypeAny>(
+
+// //export function validateMarkdownObjects<T extends Record<string, any>>(
+// export function validateMarkdownObjects<T extends z.ZodTypeAny>(
+//     objects: MarkdownFileResult[],
+//     schema: z.ZodSchema<T>,
+// ): MarkdownObjectsValidState<T> {
+
+export function validateMarkdownObjects<T extends Record<string, unknown>>(
     objects: MarkdownFileResult[],
-    schema: z.ZodSchema<T>,
+    schema: z.ZodType<T>,
 ): MarkdownObjectsValidState<T> {
     const validationErrors: string[] = [];
     const validatedObjects: MarkdownDocument<T>[] = [];
