@@ -111,7 +111,8 @@ export type MarkdownObject<T extends Record<string, any>> = {
  *
  * @template T - The validated type of the frontmatter object
  */
-export type MarkdownObjectsValidState<T extends Record<string, any>> = {
+//export type MarkdownObjectsValidState<T extends Record<string, any>> = {
+export type MarkdownObjectsValidState<T extends Record<string, unknown>> = {
     /** Total number of files found */
     filesFound: number;
     /** Number of files that passed validation */

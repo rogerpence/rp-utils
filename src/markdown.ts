@@ -142,12 +142,18 @@ export async function getMarkdownObjects(
 //     schema: z.ZodSchema<T>,
 // ): MarkdownObjectsValidState<T> {
 
+// export function validateMarkdownObjects<T extends Record<string, unknown>>(
+//     objects: MarkdownFileResult[],
+//     schema: z.ZodType<T>,
+// ): MarkdownObjectsValidState<T> {
+
 export function validateMarkdownObjects<T extends Record<string, unknown>>(
     objects: MarkdownFileResult[],
     schema: z.ZodType<T>,
-): MarkdownObjectsValidState<T> {
+): MarkdownObjectsValidState<z.infer<T>> {
     const validationErrors: string[] = [];
-    const validatedObjects: MarkdownDocument<T>[] = [];
+    //const validatedObjects: MarkdownDocument<T>[] = [];
+    const validatedObjects: MarkdownDocument<z.infer<T>>[] = [];
     const now = new Date();
 
     let filesFound = objects.length;
@@ -176,7 +182,7 @@ export function validateMarkdownObjects<T extends Record<string, unknown>>(
             validatedObjects.push({
                 dirent: obj.dirent,
                 markdownObject: {
-                    frontMatter: result.data, // Now properly typed as T!
+                    frontMatter: result.data as z.infer<T>,
                     content: obj.markdownObject.content,
                 },
             });
