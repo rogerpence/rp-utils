@@ -191,9 +191,11 @@ export type ParseResult =
  * @property {string} exportName - When provided, creates an export with this name. Should be used only for .ts/.js files.
  * @property {boolean} compressed - When true, remove whitespace from seralized object.
  * @property {boolean} log - Write a message to the command line.
+ * @property {string} importLine - Provide an import line when the exportName needs it.  *
  */
 export type WriteObjectToFileOptions = {
     exportName?: string;
     compressed?: boolean;
     log?: boolean;
+    importLine?: string;
 };

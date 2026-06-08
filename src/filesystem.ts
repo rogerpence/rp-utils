@@ -384,13 +384,21 @@ export function writeObjectToFile(
             ? `export const ${options?.exportName} = `
             : "";
 
+        const importLine = options?.importLine
+            ? `${options?.importLine}\n\n `
+            : "";
+
         // Serialize with appropriate formatting
         const json = compressed
             ? JSON.stringify(object)
             : JSON.stringify(object, null, 4);
 
         // Write to file
-        fs.writeFileSync(filePath, `${exportedName}${json}`, "utf-8");
+        fs.writeFileSync(
+            filePath,
+            `${importLine}${exportedName}${json}`,
+            "utf-8",
+        );
 
         // Optional logging
         if (log) {
