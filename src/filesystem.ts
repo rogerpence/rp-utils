@@ -489,6 +489,8 @@ export async function getAllFilenames(
     const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
     const targetDirectory = path.resolve(moduleDirectory, relativePath);
 
+    console.log("target directory", targetDirectory);
+
     if (!fs.existsSync(targetDirectory)) {
         throw new Error(`Path not found: ${relativePath}`);
     }
