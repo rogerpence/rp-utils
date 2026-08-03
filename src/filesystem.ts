@@ -488,8 +488,6 @@ export async function getAllFilenames(
 ): Promise<string[]> {
     const targetDirectory = path.resolve(process.cwd(), relativePath);
 
-    console.log("target directory", targetDirectory);
-
     if (!fs.existsSync(targetDirectory)) {
         throw new Error(`Path not found: ${relativePath}`);
     }
