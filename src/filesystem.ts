@@ -486,8 +486,7 @@ export async function getAllFilenames(
     relativePath: string,
     extension: string = "",
 ): Promise<string[]> {
-    const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
-    const targetDirectory = path.resolve(moduleDirectory, relativePath);
+    const targetDirectory = path.resolve(process.cwd(), relativePath);
 
     console.log("target directory", targetDirectory);
 

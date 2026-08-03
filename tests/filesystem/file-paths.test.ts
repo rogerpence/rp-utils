@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { getAppPath, getProjectRoot } from "../../src/filesystem";
+import {
+    getAllFilenames,
+    getAppPath,
+    getProjectRoot,
+} from "../../src/filesystem";
 import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 // const fs = require("fs");
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +37,18 @@ describe("test file path stuff", () => {
             expect(appPath).toBe(
                 "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\testfile.json",
             );
+        });
+
+        it("resolves relative paths from the current working directory", async () => {
+            const originalCwd = process.cwd();
+
+            try {
+                process.chdir(join(__dirname, "..", ".."));
+                const filenames = await getAllFilenames("tests/test-data");
+                expect(filenames.length).toBeGreaterThan(0);
+            } finally {
+                process.chdir(originalCwd);
+            }
         });
     });
 });
