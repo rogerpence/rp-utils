@@ -1,19 +1,3 @@
-# TypeScript utility functions
-
-[Documentation](https://rogerpence.github.io/rp-utils/)
-
-## To add this to a project
-
-```
-pnpm add https://github.com/rogerpence/rp-utils
-```
-
-or, to install a specific version: 
-
-```
-pnpm add https://github.com/rogerpence/rp-utils#[major].[minor].[patch]
-```
-
 # Barrel Exports in This Project
 
 This project uses a **barrel export** file at `src/index.ts`.

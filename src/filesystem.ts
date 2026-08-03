@@ -452,3 +452,57 @@ export function classifyFilePath(filePath: string): PathKind {
     // Otherwise it's a relative path
     return "relative";
 }
+
+/**
+ * Determines whether a path points to a file.
+ *
+ * Returns false when the path does not exist or cannot be accessed.
+ *
+ * @param fullPath Fully qualified path to check.
+ * @returns True when the path exists and is a file; otherwise false.
+ */
+export async function isFilename(fullPath: string): Promise<boolean> {
+    try {
+        const stats = await fsa.stat(fullPath);
+        return stats.isFile();
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Recursively collects fully qualified file paths from a folder and its
+ * subfolders, optionally filtering by file extension.
+ *
+ * The input folder is resolved relative to this module's directory.
+ *
+ * @param relativePath Path to the target folder, relative to this file.
+ * @param extension Optional extension suffix used by glob filtering
+ * (for example, ".md"). Defaults to an empty string (no filter).
+ * @returns A list of absolute file paths for entries that are files.
+ * @throws {Error} If the resolved target folder does not exist.
+ */
+export async function getAllFilenames(
+    relativePath: string,
+    extension: string = "",
+): Promise<string[]> {
+    const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
+    const targetDirectory = path.resolve(moduleDirectory, relativePath);
+
+    if (!fs.existsSync(targetDirectory)) {
+        throw new Error(`Path not found: ${relativePath}`);
+    }
+
+    const result: string[] = [];
+
+    for await (const relativeEntryPath of fsa.glob(`**/*${extension}`, {
+        cwd: targetDirectory,
+    })) {
+        const potentialFilename = path.join(targetDirectory, relativeEntryPath);
+        if (await isFilename(potentialFilename)) {
+            result.push(potentialFilename);
+        }
+    }
+
+    return result;
+}

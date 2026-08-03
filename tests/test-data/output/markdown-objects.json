@@ -2,8 +2,8 @@
     {
         "dirent": {
             "name": "add-a-marddown-frontmatter-property-with-vs-code.md",
-            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
-            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
+            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
+            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
         },
         "markdownObject": {
             "frontMatter": {
@@ -23,30 +23,9 @@
     },
     {
         "dirent": {
-            "name": "animate-css-details-summary-element.md",
-            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
-            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
-        },
-        "markdownObject": {
-            "frontMatter": {
-                "title": "Animate CSS details-summary element",
-                "description": "Animate CSS details-summary element",
-                "date_created": "2025-05-18T00:00:00.000Z",
-                "date_updated": "2025-09-30T00:00:00.000Z",
-                "date_published": null,
-                "pinned": false,
-                "tags": [
-                    "design"
-                ]
-            },
-            "content": "\n# Animate CSS details-summary element without JavaScript\n\nAs of 30-Oct-2024 this feature requires enabling \"Experimental Web Platform Features\" in the chrome://flags/ or using Chrome 131 (the features necessary aren't yet in any other browsers--but the feature is a nice progressive enhancement for Chrome users).\n[CSS Weekly's CodePen that shows how to animate the details element](https://codepen.io/ZoranJambor/pen/jOorzPv)\n[Kevin Powell's (ripoff?) video about animating the details element](https://www.youtube.com/watch?v=Vzj3jSUbMtI)\n\n### Using JavaScript\n\nA version of animating the `details` tags using JavaScript is here:\n\n-   `E:\\luther-backup-2.0\\delray\\users-thumb-Documents\\Projects\\client\\html-css\\ui-examples\\accordion-04-detail-summary`\n-   The magic JavaScript in this project came this old CSS Tricks article. The JS class it provides is dead simple to use.\n"
-        }
-    },
-    {
-        "dirent": {
             "name": "add-postcss-to-sveltekit-project.md",
-            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
-            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
+            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
+            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
         },
         "markdownObject": {
             "frontMatter": {
@@ -67,9 +46,30 @@
     },
     {
         "dirent": {
+            "name": "animate-css-details-summary-element.md",
+            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
+            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
+        },
+        "markdownObject": {
+            "frontMatter": {
+                "title": "Animate CSS details-summary element",
+                "description": "Animate CSS details-summary element",
+                "date_created": "2025-05-18T00:00:00.000Z",
+                "date_updated": "2025-09-30T00:00:00.000Z",
+                "date_published": null,
+                "pinned": false,
+                "tags": [
+                    "design"
+                ]
+            },
+            "content": "\n# Animate CSS details-summary element without JavaScript\n\nAs of 30-Oct-2024 this feature requires enabling \"Experimental Web Platform Features\" in the chrome://flags/ or using Chrome 131 (the features necessary aren't yet in any other browsers--but the feature is a nice progressive enhancement for Chrome users).\n[CSS Weekly's CodePen that shows how to animate the details element](https://codepen.io/ZoranJambor/pen/jOorzPv)\n[Kevin Powell's (ripoff?) video about animating the details element](https://www.youtube.com/watch?v=Vzj3jSUbMtI)\n\n### Using JavaScript\n\nA version of animating the `details` tags using JavaScript is here:\n\n-   `E:\\luther-backup-2.0\\delray\\users-thumb-Documents\\Projects\\client\\html-css\\ui-examples\\accordion-04-detail-summary`\n-   The magic JavaScript in this project came this old CSS Tricks article. The JS class it provides is dead simple to use.\n"
+        }
+    },
+    {
+        "dirent": {
             "name": "animating-the-dialog-and-popover-elements.md",
-            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
-            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good"
+            "path": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown\\all-good",
+            "parentPath": "C:\\Users\\thumb\\Documents\\projects\\typescript\\utils\\tests\\test-data\\markdown"
         },
         "markdownObject": {
             "frontMatter": {

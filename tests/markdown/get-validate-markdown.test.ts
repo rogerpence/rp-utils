@@ -6,6 +6,7 @@ import {
     deleteFile,
     writeTextFile,
     writeObjectToFile,
+    getAllFilenames,
 } from "../../src/filesystem";
 
 import {
@@ -22,27 +23,26 @@ import {
 describe("converting markdown to objects", () => {
     const errorFilePath = getAppPath(
         import.meta.url,
-        "tests\\test-data\\output"
+        "tests\\test-data\\output",
     );
 
     const fullErrorFilename = path.join(
         errorFilePath,
-        "markdown-validation-errors.txt"
+        "markdown-validation-errors.txt",
     );
 
     describe("when four files all have parseable frontmatter", () => {
         it("should fetch four TechnicalNoteFrontmatter objects", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
-                "tests\\test-data\\markdown\\all-good"
+                "tests\\test-data\\markdown\\all-good",
             );
-            const { successful, failed } = await getMarkdownObjects(
-                markdownDataPath
-            );
+            const { successful, failed } =
+                await getMarkdownObjects(markdownDataPath);
 
             const markdownOutputPath = path.join(
                 getAppPath(import.meta.url, "tests\\test-data\\output"),
-                "markdown-objects.json"
+                "markdown-objects.json",
             );
 
             writeObjectToFile(successful, markdownOutputPath);
@@ -55,7 +55,7 @@ describe("converting markdown to objects", () => {
         it("should fetch four TechnicalNoteFrontmatter objects and four ", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
-                "tests\\test-data\\markdown\\all-good"
+                "tests\\test-data\\markdown\\all-good",
             );
 
             const { successful: markdownObjects, failed } =
@@ -65,7 +65,7 @@ describe("converting markdown to objects", () => {
 
             const markdownValidator = validateMarkdownObjects(
                 markdownObjects,
-                TechnicalNoteFrontmatterSchema
+                TechnicalNoteFrontmatterSchema,
             );
 
             expect(markdownValidator.filesFound).toBe(4);
@@ -75,7 +75,7 @@ describe("converting markdown to objects", () => {
 
             writeTextFile(
                 markdownValidator.validationErrors.join("\n"),
-                fullErrorFilename
+                fullErrorFilename,
             );
         });
     });
@@ -86,7 +86,7 @@ describe("converting markdown to objects", () => {
         it("should show success", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
-                "tests\\test-data\\markdown\\one-bad"
+                "tests\\test-data\\markdown\\one-bad",
             );
             const { successful: markdownObjects, failed } =
                 await getMarkdownObjects(markdownDataPath);
@@ -96,17 +96,17 @@ describe("converting markdown to objects", () => {
             const markdownValidator =
                 validateMarkdownObjects<TechnicalNoteFrontmatter>(
                     markdownObjects,
-                    TechnicalNoteFrontmatterSchema
+                    TechnicalNoteFrontmatterSchema,
                 );
 
             expect(markdownValidator.filesValid).toBeLessThan(
-                markdownValidator.filesFound
+                markdownValidator.filesFound,
             );
 
             if (markdownValidator.validationErrors.length > 1) {
                 writeTextFile(
                     markdownValidator.validationErrors.join("\n"),
-                    fullErrorFilename
+                    fullErrorFilename,
                 );
             }
         });
@@ -118,7 +118,7 @@ describe("converting markdown to objects", () => {
         it("should show success 3", async () => {
             const markdownDataPath = getAppPath(
                 import.meta.url,
-                "tests\\test-data\\markdown\\one-malformed-frontmatter"
+                "tests\\test-data\\markdown\\one-malformed-frontmatter",
             );
 
             const { successful: markdownObjects, failed } =
@@ -128,7 +128,7 @@ describe("converting markdown to objects", () => {
 
             const markdownValidator = validateMarkdownObjects(
                 markdownObjects,
-                TechnicalNoteFrontmatterSchema
+                TechnicalNoteFrontmatterSchema,
             );
 
             // const markdownValidator =
@@ -138,7 +138,7 @@ describe("converting markdown to objects", () => {
             //     );
 
             expect(markdownValidator.filesFound).toBeGreaterThan(
-                markdownValidator.filesValid
+                markdownValidator.filesValid,
             );
         });
     });

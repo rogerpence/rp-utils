@@ -1,8 +1,8 @@
-Frontmatter Validation Errors  2026-06-08 9:46:21 AM
+Frontmatter Validation Errors  2026-08-03 12:16:39 PM
 
-Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\one-bad\add-a-marddown-frontmatter-property-with-vs-code.md
+Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\add-a-marddown-frontmatter-property-with-vs-code.md
     Error: pinned: Invalid input: expected boolean, received undefined
 
-Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\one-bad\add-postcss-to-sveltekit-project.md
+Filename: C:\Users\thumb\Documents\projects\typescript\utils\tests\test-data\markdown\add-postcss-to-sveltekit-project.md
     Error: date_created: Invalid input
     Error: : Unrecognized key: "date_createdd"

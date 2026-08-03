@@ -13,12 +13,16 @@ import {
     ParsedMarkdown,
 } from "./types";
 
+import { getAllFilenames } from "../src/filesystem";
+
 import {
     deleteFile,
     getAppPath,
     getAllDirEntries,
     writeTextFile,
 } from "./filesystem";
+
+import { removeLastArrayElement } from "../src/array";
 
 import { convertDateToStringYYYY_MM_DD } from "./date";
 
@@ -65,25 +69,34 @@ import { convertDateToStringYYYY_MM_DD } from "./date";
 export async function getMarkdownObjects(
     folder: string,
 ): Promise<MarkdownParseResult> {
-    const fileInfo: DirentInfo[] = getAllDirEntries(folder) ?? [];
+    const filenames: string[] = await getAllFilenames(folder, ".md");
 
     const successful: MarkdownFileResult[] = [];
     const failed: MarkdownParseResult["failed"] = [];
 
     await Promise.all(
-        fileInfo.map(async (fi) => {
-            const fullFilename = path.join(fi.parentPath, fi.name);
-            const result = await parseMarkdownFile(fullFilename);
+        filenames.map(async (filename) => {
+            const result = await parseMarkdownFile(filename);
+            const filePath = path.dirname(filename);
+            const fileParentPath = removeLastArrayElement(
+                filePath.split("\\"),
+            ).join("\\");
+
+            const dirent = {
+                name: path.basename(filename),
+                path: filePath,
+                parentPath: fileParentPath,
+            };
 
             if (result.success) {
                 successful.push({
-                    dirent: fi,
+                    dirent,
                     markdownObject: result.data,
                 });
             } else {
                 failed.push({
-                    filename: fullFilename,
-                    dirent: fi,
+                    filename: filename,
+                    dirent,
                     error: result.error,
                 });
             }
