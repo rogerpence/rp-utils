@@ -1,6 +1,6 @@
 {
     "name": "rp-utils",
-    "version": "1.0.61",
+    "version": "1.0.62",
     "type": "module",
     "main": "./src/index.js",
     "exports": {
